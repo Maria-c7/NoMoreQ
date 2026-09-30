@@ -1,0 +1,6 @@
+{
+  "name": "NoMoreQ - Garden City University Queue & Marketplace",
+  "description": "Smart demand redistribution, queue tracking, multi-shop pre-ordering, digital token management, and staff control panel for Garden City University.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

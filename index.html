@@ -1,0 +1,2778 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NoMoreQ • Garden City University</title>
+  <meta name="description" content="NoMoreQ - Garden City University Campus Marketplace & Smart Queue Portal" />
+
+  <!-- Fonts & Libraries -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              cream: '#FDFBF7',
+              beige: '#F5F2EB',
+              surface: '#EFECE6',
+              surface2: '#E5E0D8',
+              border: '#DDD7CD',
+              darkForest: '#1C3123',
+              darkForestHover: '#132218',
+              slate: '#2D3748',
+              muted: '#64748B',
+              mint: '#C8D6AF',
+              mintSoft: '#D8E2DC',
+              mintDark: '#2F5233',
+              accent: '#3B7A57',
+              gold: '#D97706',
+              darkBg: '#121714',
+              darkSurface: '#19221C',
+              darkSurface2: '#202D25',
+              darkBorder: '#2B3D32'
+            }
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace']
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      transition: background-color 0.25s ease, color 0.25s ease;
+    }
+    .custom-scroll::-webkit-scrollbar { width: 5px; height: 5px; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: #CBD5E0; border-radius: 9999px; }
+    .dark .custom-scroll::-webkit-scrollbar-thumb { background: #374151; }
+  </style>
+</head>
+<body class="bg-brand-cream text-brand-darkForest dark:bg-brand-darkBg dark:text-slate-100 min-h-screen selection:bg-brand-mint selection:text-brand-darkForest flex flex-col">
+  
+  <!-- ============================================== -->
+  <!-- COLLAPSIBLE LEFT NAVIGATION SIDEBAR            -->
+  <!-- ============================================== -->
+  <div id="sidebarBackdrop" onclick="toggleSidebar(false)" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs transition-opacity duration-300 opacity-0 pointer-events-none"></div>
+  
+  <aside id="mainSidebar" class="fixed inset-y-0 left-0 z-50 w-72 bg-brand-beige dark:bg-brand-darkSurface border-r border-brand-border dark:border-brand-darkBorder p-5 flex flex-col justify-between shadow-2xl transition-transform duration-300 transform -translate-x-full">
+    <div class="space-y-6">
+      
+      <!-- Sidebar Header -->
+      <div class="flex items-center justify-between pb-4 border-b border-brand-border dark:border-brand-darkBorder">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-brand-darkForest text-brand-mint dark:bg-brand-mint dark:text-brand-darkForest font-black flex items-center justify-center text-lg shadow-sm">
+            Q
+          </div>
+          <div>
+            <span class="font-extrabold text-base tracking-tight text-brand-darkForest dark:text-white">NoMoreQ</span>
+            <p class="text-[10px] text-brand-muted dark:text-slate-400 font-medium">Garden City University</p>
+          </div>
+        </div>
+        <button onclick="toggleSidebar(false)" class="p-1 rounded-lg text-brand-muted hover:text-brand-darkForest dark:hover:text-white transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Active User Profile Pill in Sidebar -->
+      <div class="p-3 rounded-2xl bg-brand-surface dark:bg-brand-darkSurface2 border border-brand-border dark:border-brand-darkBorder flex items-center gap-3">
+        <div id="sidebarAvatar" class="w-8 h-8 rounded-xl bg-brand-mint text-brand-darkForest font-black text-xs flex items-center justify-center">
+          R
+        </div>
+        <div class="overflow-hidden">
+          <p id="sidebarUserName" class="font-bold text-xs text-brand-darkForest dark:text-white truncate">Rahul Sharma</p>
+          <p id="sidebarUserRole" class="text-[10px] text-brand-muted dark:text-slate-400">Student • gcu.edu.in</p>
+        </div>
+      </div>
+
+      <!-- Dynamic Navigation Items (Student vs Vendor) -->
+      <nav id="sidebarNavItems" class="space-y-1.5 overflow-y-auto max-h-[calc(100vh-280px)] custom-scroll pr-1">
+        <!-- Injected dynamically via renderSidebarNav() -->
+      </nav>
+    </div>
+
+    <!-- Sidebar Bottom Controls -->
+    <div class="pt-4 border-t border-brand-border dark:border-brand-darkBorder space-y-2">
+      <div class="flex items-center justify-between text-xs px-2 text-brand-muted dark:text-slate-400">
+        <span>GCU Campus Portal</span>
+        <span class="font-mono">v2.4 Live</span>
+      </div>
+      <button onclick="handleLogout()" class="w-full py-2 px-3 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-700 dark:text-rose-400 font-bold text-xs flex items-center justify-center gap-2 transition">
+        <i data-lucide="log-out" class="w-4 h-4"></i>
+        <span>Logout / Switch Role</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ============================================== -->
+  <!-- TOP NAVIGATION HEADER                          -->
+  <!-- ============================================== -->
+  <header class="sticky top-0 z-40 bg-brand-cream/90 dark:bg-brand-darkBg/90 backdrop-blur-md border-b border-brand-border dark:border-brand-darkBorder shadow-xs">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-3">
+      
+      <!-- Left: Hamburger Menu Button & Branding -->
+      <div class="flex items-center gap-3">
+        <button onclick="toggleSidebar(true)" title="Open Navigation Menu" class="p-2 rounded-xl bg-brand-surface dark:bg-brand-darkSurface hover:bg-brand-surface2 dark:hover:bg-brand-darkSurface2 border border-brand-border dark:border-brand-darkBorder text-brand-darkForest dark:text-white transition flex items-center justify-center">
+          <i data-lucide="menu" class="w-5 h-5"></i>
+        </button>
+
+        <div class="flex items-center gap-2.5 cursor-pointer" onclick="toggleSidebar(true)">
+          <div class="w-9 h-9 rounded-xl bg-brand-darkForest text-brand-mint dark:bg-brand-mint dark:text-brand-darkForest font-black flex items-center justify-center text-lg shadow-sm">
+            Q
+          </div>
+          <div>
+            <div class="flex items-center gap-1.5">
+              <span class="font-extrabold text-base sm:text-lg tracking-tight text-brand-darkForest dark:text-white">NoMoreQ</span>
+              <span class="hidden sm:inline-block px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider bg-brand-mint text-brand-mintDark rounded-full border border-brand-mintDark/20">
+                GCU Live
+              </span>
+            </div>
+            <p class="text-[10px] text-brand-muted dark:text-slate-400 font-medium">Garden City University</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Center: Campus Crowd Load Indicator -->
+      <div class="hidden lg:flex items-center gap-3 bg-brand-surface dark:bg-brand-darkSurface border border-brand-border dark:border-brand-darkBorder px-4 py-1.5 rounded-full text-xs">
+        <div class="flex items-center gap-2">
+          <span class="relative flex h-2 w-2">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+          </span>
+          <span id="navLiveClock" class="font-mono font-semibold">12:30:00 PM</span>
+        </div>
+        <span class="text-brand-border dark:text-slate-600">|</span>
+        <div class="flex items-center gap-1.5 font-bold text-brand-darkForest dark:text-white">
+          <i data-lucide="activity" class="w-3.5 h-3.5 text-brand-accent"></i>
+          <span id="topWaitScore">Campus Load: 78% • High Rush</span>
+        </div>
+      </div>
+
+      <!-- Right Action Controls -->
+      <div class="flex items-center gap-1.5 sm:gap-2">
+        
+        <!-- Voice Assistant Toggle -->
+        <button id="voiceToggleBtn" onclick="toggleVoiceAssistant()" title="Voice AI Assistant" class="p-2 rounded-xl border border-brand-border dark:border-brand-darkBorder bg-brand-surface dark:bg-brand-darkSurface text-brand-darkForest dark:text-white transition flex items-center gap-1">
+          <i id="voiceIcon" data-lucide="volume-2" class="w-4 h-4 text-brand-accent"></i>
+          <span id="voiceBadge" class="hidden xl:inline text-xs font-bold text-brand-mintDark dark:text-brand-mint">Voice ON</span>
+        </button>
+
+        <!-- Sound Alert Mute Switch -->
+        <button id="soundToggleBtn" onclick="toggleSoundAlerts()" title="Mute/Unmute Audio Alerts" class="p-2 rounded-xl border border-brand-border dark:border-brand-darkBorder bg-brand-surface dark:bg-brand-darkSurface text-brand-darkForest dark:text-white transition">
+          <i id="soundIcon" data-lucide="bell" class="w-4 h-4"></i>
+        </button>
+
+        <!-- Voice Announcement Test -->
+        <button onclick="testVoiceAnnouncement()" title="Test Voice Announcement" class="hidden sm:flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-xl border border-brand-mintDark/30 bg-brand-mint/60 dark:bg-brand-mint/20 text-brand-mintDark dark:text-brand-mint font-bold transition hover:bg-brand-mint">
+          <i data-lucide="mic" class="w-3.5 h-3.5"></i>
+          <span>Test Voice</span>
+        </button>
+
+        <!-- Dark/Light Mode -->
+        <button id="themeToggleBtn" onclick="toggleTheme()" title="Switch Light/Dark" class="p-2 rounded-xl border border-brand-border dark:border-brand-darkBorder bg-brand-surface dark:bg-brand-darkSurface text-brand-darkForest dark:text-white transition">
+          <i id="themeIcon" data-lucide="moon" class="w-4 h-4"></i>
+        </button>
+
+        <!-- Cart Trigger (Student View) -->
+        <button id="topCartBtn" onclick="toggleCartDrawer(true)" class="relative p-2 rounded-xl border border-brand-border dark:border-brand-darkBorder bg-brand-surface dark:bg-brand-darkSurface text-brand-darkForest dark:text-white transition">
+          <i data-lucide="shopping-bag" class="w-4 h-4"></i>
+          <span id="cartCountBadge" class="absolute -top-1 -right-1 bg-brand-darkForest text-white dark:bg-brand-mint dark:text-brand-darkForest text-[10px] font-black w-4 h-4 rounded-full flex items-center justify-center">0</span>
+        </button>
+
+        <!-- User Role Switcher Trigger -->
+        <button onclick="openRoleSwitchModal()" class="flex items-center gap-1.5 p-1.5 sm:px-2.5 rounded-xl bg-brand-surface dark:bg-brand-darkSurface border border-brand-border dark:border-brand-darkBorder transition text-left">
+          <div id="topUserAvatar" class="w-7 h-7 rounded-lg bg-brand-mint text-brand-mintDark font-black text-xs flex items-center justify-center">
+            R
+          </div>
+          <div class="hidden md:block text-xs leading-tight">
+            <p id="topUserName" class="font-bold text-brand-darkForest dark:text-white max-w-[90px] truncate">Rahul S.</p>
+            <p id="topUserRole" class="text-[10px] text-brand-muted dark:text-slate-400 font-semibold">Student</p>
+          </div>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============================================== -->
+  <!-- MAIN APP ROUTER CONTAINER                      -->
+  <!-- ============================================== -->
+  <main id="mainAppContent" class="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 space-y-8">
+    <!-- Sub-views rendered dynamically based on active nav selection -->
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="mt-auto border-t border-brand-border dark:border-brand-darkBorder bg-brand-surface dark:bg-brand-darkSurface py-5 px-4 text-center text-xs text-brand-muted dark:text-slate-400">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
+      <p class="font-bold text-brand-darkForest dark:text-white">NoMoreQ • Garden City University Campus Portal</p>
+      <p>Official Campus Marketplace & Queue Redistribution Engine • Domain: @gcu.edu.in</p>
+    </div>
+  </footer>
+
+  <!-- ============================================== -->
+  <!-- MODAL: UNIFIED LOGIN (GCU DOMAIN ENFORCED)     -->
+  <!-- ============================================== -->
+  <div id="loginModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm hidden">
+    <div class="bg-brand-cream dark:bg-brand-darkSurface border border-brand-border dark:border-brand-darkBorder rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-5 relative">
+      <button id="closeLoginBtn" onclick="closeLoginModal()" class="absolute top-4 right-4 text-brand-muted hover:text-brand-darkForest dark:hover:text-white p-1">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <div class="text-center space-y-1">
+        <div class="w-12 h-12 mx-auto rounded-2xl bg-brand-darkForest text-brand-mint dark:bg-brand-mint dark:text-brand-darkForest font-black text-xl flex items-center justify-center shadow-md">
+          Q
+        </div>
+        <h2 class="text-xl font-extrabold text-brand-darkForest dark:text-white">NoMoreQ - Garden City University</h2>
+        <p class="text-xs text-brand-muted dark:text-slate-400">Campus Marketplace & Smart Queue Portal</p>
+      </div>
+
+      <!-- Split Portal Tabs -->
+      <div class="flex rounded-xl bg-brand-surface dark:bg-brand-darkSurface2 p-1 border border-brand-border dark:border-brand-darkBorder">
+        <button id="tabStudent" onclick="switchLoginTab('student')" class="w-1/2 py-2 rounded-lg font-bold text-xs bg-brand-darkForest text-white dark:bg-brand-mint dark:text-brand-darkForest shadow-sm transition">
+          Student Portal
+        </button>
+        <button id="tabVendor" onclick="switchLoginTab('vendor')" class="w-1/2 py-2 rounded-lg font-semibold text-xs text-brand-slate dark:text-slate-300 transition">
+          Vendor / Shop Manager
+        </button>
+      </div>
+
+      <!-- Student Login Form -->
+      <div id="studentForm" class="space-y-3">
+        <div>
+          <label class="block text-xs font-semibold text-brand-slate dark:text-slate-300 mb-1">GCU Student Email ID</label>
+          <input 
+            type="email" 
+            id="studentEmailInput" 
+            placeholder="rahul.s@gcu.edu.in"
+            class="w-full px-3 py-2 rounded-xl bg-white dark:bg-brand-darkBg border border-brand-border dark:border-brand-darkBorder text-xs text-brand-darkForest dark:text-white focus:outline-none focus:border-brand-darkForest"
+          />
+          <p class="text-[10px] text-brand-muted mt-1 font-medium">Domain strictly verified: <strong>@gcu.edu.in</strong></p>
+        </div>
+        <button onclick="handleStudentCustomLogin()" class="w-full py-2.5 rounded-xl bg-brand-darkForest hover:bg-brand-darkForestHover text-white font-bold text-xs transition">
+          Sign In as Student
+        </button>
+        <div class="relative flex items-center justify-center my-1">
+          <div class="border-t border-brand-border dark:border-brand-darkBorder w-full"></div>
+          <span class="bg-brand-cream dark:bg-brand-darkSurface px-2 text-[10px] text-brand-muted uppercase font-bold">Or Instant Demo</span>
+        </div>
+        <button onclick="quickDemoLogin('student')" class="w-full py-2.5 rounded-xl bg-brand-mint hover:bg-brand-mintSoft text-brand-mintDark font-black text-xs transition flex items-center justify-center gap-1.5 shadow-sm">
+          <i data-lucide="zap" class="w-4 h-4 fill-brand-mintDark"></i>
+          <span>⚡ Quick Demo Login (Student)</span>
+        </button>
+      </div>
+
+      <!-- Vendor / Shop Manager Login Form -->
+      <div id="vendorForm" class="space-y-3 hidden">
+        <div>
+          <label class="block text-xs font-semibold text-brand-slate dark:text-slate-300 mb-1">Select GCU Campus Outlet</label>
+          <select id="loginVendorOutletSelect" class="w-full px-3 py-2 rounded-xl bg-white dark:bg-brand-darkBg border border-brand-border dark:border-brand-darkBorder text-xs text-brand-darkForest dark:text-white focus:outline-none">
+            <option value="stationery-print">6. GCU Central Stationery & Print Shop</option>
+            <option value="food-court">1. Main GCU Food Court</option>
+            <option value="grill-street">2. The GCU Grill & Street Food Stall</option>
+            <option value="south-bites">3. GCU South Bites Stall</option>
+            <option value="bakery-hub">4. GCU Bakery & Snack Hub</option>
+            <option value="juicy-bar">5. GCU Juicy & Shake Bar</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-brand-slate dark:text-slate-300 mb-1">Vendor Email ID</label>
+          <input 
+            type="email" 
+            id="vendorEmailInput" 
+            value="stationery.manager@gcu.edu.in"
+            class="w-full px-3 py-2 rounded-xl bg-white dark:bg-brand-darkBg border border-brand-border dark:border-brand-darkBorder text-xs text-brand-darkForest dark:text-white focus:outline-none font-mono"
+          />
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-brand-slate dark:text-slate-300 mb-1">Security PIN</label>
+          <input 
+            type="password" 
+            id="vendorPinInput" 
+            value="1234"
+            class="w-full px-3 py-2 rounded-xl bg-white dark:bg-brand-darkBg border border-brand-border dark:border-brand-darkBorder text-xs text-brand-darkForest dark:text-white focus:outline-none font-mono"
+          />
+        </div>
+        <button onclick="handleVendorCustomLogin()" class="w-full py-2.5 rounded-xl bg-brand-darkForest hover:bg-brand-darkForestHover text-white font-bold text-xs transition">
+          Access Vendor Portal
+        </button>
+        <button onclick="quickDemoLogin('vendor')" class="w-full py-2.5 rounded-xl bg-brand-mint hover:bg-brand-mintSoft text-brand-mintDark font-black text-xs transition flex items-center justify-center gap-1.5 shadow-sm">
+          <i data-lucide="zap" class="w-4 h-4 fill-brand-mintDark"></i>
+          <span>⚡ Quick Demo Login (Vendor)</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: ADD NEW MENU ITEM (VENDOR)              -->
+  <!-- ============================================== -->
+  <div id="addItemModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm hidden">
+    <div class="bg-brand-cream dark:bg-brand-darkSurface border border-brand-border dark:border-brand-darkBorder rounded-2xl max-w-md w-full p-5 shadow-2xl space-y-4 relative">
+      <button onclick="closeAddItemModal()" class="absolute top-4 right-4 text-brand-muted hover:text-brand-darkForest dark:hover:text-white">
+        <i data-lucide="x" class="w-4 h-4"></i>
+      </button>
+      <div class="space-y-1">
+        <h3 class="font-bold text-base text-brand-darkForest dark:text-white">Add New Catalog Item</h3>
+        <p class="text-xs text-brand-muted">Publish food, snack or stationery service item to your live kiosk</p>
+      </div>
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="block font-semibold mb-1">Item Title / Name</label>
+          <input type="text" id="newItemName" placeholder="e.g. Masala Chai, Color Laser Print" class="w-full px-3 py-2 rounded-xl bg-white dark:bg-brand-darkBg border border-brand-border dark:border-brand-darkBorder focus:outline-none" />
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block font-semibold mb-1">Price (₹)</label>
+            <input type="number" id="newItemPrice" placeholder="50" class="w-full px-3 py-2 rounded-xl bg-white dark:bg-brand-darkBg border border-brand-border dark:border-brand-darkBorder focus:outline-none font-mono" />
+          </div>
+          <div>
+            <label class="block font-semibold mb-1">Category / Tag</label>
+            <input type="text" id="newItemTag" placeholder="Popular / Fast" class="w-full px-3 py-2 rounded-xl bg-white dark:bg-brand-darkBg border border-brand-border dark:border-brand-darkBorder focus:outline-none" />
+          </div>
+        </div>
+        <div>
+          <label class="block font-semibold mb-1">Description / Notes</label>
+          <textarea id="newItemDesc" rows="2" placeholder="Brief description of meal or binding service..." class="w-full px-3 py-2 rounded-xl bg-white dark:bg-brand-darkBg border border-brand-border dark:border-brand-darkBorder focus:outline-none"></textarea>
+        </div>
+      </div>
+      <button onclick="confirmAddNewItem()" class="w-full py-2.5 rounded-xl bg-brand-darkForest hover:bg-brand-darkForestHover text-white font-bold text-xs transition">
+        Save & Add to Menu
+      </button>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: DIGITAL INVOICE RECEIPT (VENDOR)        -->
+  <!-- ============================================== -->
+  <div id="invoiceModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm hidden">
+    <div class="bg-brand-cream dark:bg-brand-darkSurface border border-brand-border dark:border-brand-darkBorder rounded-2xl max-w-sm w-full p-6 shadow-2xl space-y-4 relative">
+      <button onclick="closeInvoiceModal()" class="absolute top-4 right-4 text-brand-muted hover:text-brand-darkForest dark:hover:text-white">
+        <i data-lucide="x" class="w-4 h-4"></i>
+      </button>
+      <div id="invoiceContent" class="space-y-4">
+        <!-- Rendered dynamically -->
+      </div>
+      <button onclick="window.print()" class="w-full py-2 rounded-xl bg-brand-darkForest text-white text-xs font-bold transition flex items-center justify-center gap-1.5">
+        <i data-lucide="printer" class="w-3.5 h-3.5"></i>
+        <span>Print Receipt / Tax Invoice</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: GCU WALLET TOP-UP (STUDENT)             -->
+  <!-- ============================================== -->
+  <div id="walletTopUpModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm hidden">
+    <div class="bg-brand-cream dark:bg-brand-darkSurface border border-brand-border dark:border-brand-darkBorder rounded-2xl max-w-sm w-full p-5 shadow-2xl space-y-4 relative">
+      <button onclick="closeWalletModal()" class="absolute top-4 right-4 text-brand-muted hover:text-brand-darkForest dark:hover:text-white">
+        <i data-lucide="x" class="w-4 h-4"></i>
+      </button>
+      <div class="space-y-1">
+        <h3 class="font-bold text-base text-brand-darkForest dark:text-white">GCU Student Wallet Top-Up</h3>
+        <p class="text-xs text-brand-muted">Instant balance via UPI / Net Banking</p>
+      </div>
+      <div class="space-y-3">
+        <div class="grid grid-cols-3 gap-2">
+          <button onclick="setTopUpAmount(100)" class="py-2 rounded-xl bg-brand-surface dark:bg-brand-darkSurface2 border border-brand-border dark:border-brand-darkBorder font-mono font-bold text-xs hover:border-brand-darkForest">+₹100</button>
+          <button onclick="setTopUpAmount(250)" class="py-2 rounded-xl bg-brand-surface dark:bg-brand-darkSurface2 border border-brand-border dark:border-brand-darkBorder font-mono font-bold text-xs hover:border-brand-darkForest">+₹250</button>
+          <button onclick="setTopUpAmount(500)" class="py-2 rounded-xl bg-brand-surface dark:bg-brand-darkSurface2 border border-brand-border dark:border-brand-darkBorder font-mono font-bold text-xs hover:border-brand-darkForest">+₹500</button>
+        </div>
+        <input type="number" id="customWalletAmount" placeholder="Enter custom amount in ₹" class="w-full px-3 py-2 text-xs rounded-xl bg-white dark:bg-brand-darkBg border border-brand-border dark:border-brand-darkBorder focus:outline-none font-mono" />
+      </div>
+      <button onclick="confirmWalletTopUp()" class="w-full py-2.5 rounded-xl bg-brand-darkForest text-white font-bold text-xs transition">
+        Top Up GCU Wallet
+      </button>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: PASS TOKEN TO FRIEND                    -->
+  <!-- ============================================== -->
+  <div id="passTokenModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm hidden">
+    <div class="bg-brand-cream dark:bg-brand-darkSurface border border-brand-border dark:border-brand-darkBorder rounded-2xl max-w-sm w-full p-5 shadow-2xl space-y-4 relative">
+      <button onclick="closePassTokenModal()" class="absolute top-4 right-4 text-brand-muted hover:text-brand-darkForest dark:hover:text-white">
+        <i data-lucide="x" class="w-4 h-4"></i>
+      </button>
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-brand-mint/40 text-brand-mintDark flex items-center justify-center font-bold">
+          <i data-lucide="user-plus" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h3 class="font-bold text-base text-brand-darkForest dark:text-white">Pass Token to Friend</h3>
+          <p class="text-xs text-brand-muted">Transfer queue token ownership</p>
+        </div>
+      </div>
+      <div class="bg-brand-surface dark:bg-brand-darkSurface2 p-3 rounded-xl border border-brand-border dark:border-brand-darkBorder text-xs space-y-1">
+        <p class="text-brand-muted">Token ID: <span id="passModalTokenId" class="font-mono font-black text-brand-darkForest dark:text-white text-sm">#GCU-108</span></p>
+        <p class="text-brand-muted">Outlet: <span id="passModalShopName" class="font-bold text-brand-darkForest dark:text-white">Main GCU Food Court</span></p>
+      </div>
+      <div class="space-y-1">
+        <label class="block text-xs font-semibold text-brand-darkForest dark:text-white">Friend's Verified GCU Email ID</label>
+        <input 
+          type="email" 
+          id="passFriendEmailInput" 
+          placeholder="priya.k@gcu.edu.in"
+          class="w-full px-3 py-2 text-xs rounded-xl bg-white dark:bg-brand-darkBg border border-brand-border dark:border-brand-darkBorder focus:outline-none focus:border-brand-darkForest font-mono"
+        />
+        <p class="text-[10px] text-brand-muted">Must strictly match format: <strong>name@gcu.edu.in</strong></p>
+      </div>
+      <div class="flex gap-2 pt-1">
+        <button onclick="closePassTokenModal()" class="w-1/2 py-2.5 rounded-xl bg-brand-surface dark:bg-brand-darkSurface2 font-semibold text-xs text-brand-darkForest dark:text-white">
+          Cancel
+        </button>
+        <button onclick="confirmPassToken()" class="w-1/2 py-2.5 rounded-xl bg-brand-darkForest hover:bg-brand-darkForestHover text-white font-bold text-xs transition">
+          Confirm Transfer
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: CANCEL ORDER & REFUND CONFIRMATION      -->
+  <!-- ============================================== -->
+  <div id="cancelOrderModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm hidden">
+    <div class="bg-brand-cream dark:bg-brand-darkSurface border border-brand-border dark:border-brand-darkBorder rounded-2xl max-w-sm w-full p-5 shadow-2xl space-y-4 relative">
+      <button onclick="closeCancelModal()" class="absolute top-4 right-4 text-brand-muted hover:text-brand-darkForest dark:hover:text-white">
+        <i data-lucide="x" class="w-4 h-4"></i>
+      </button>
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-rose-500/15 text-rose-600 flex items-center justify-center font-bold">
+          <i data-lucide="alert-triangle" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h3 class="font-bold text-base text-rose-600 dark:text-rose-400">Cancel Active Token?</h3>
+          <p class="text-xs text-brand-muted">Instant refund to GCU Wallet</p>
+        </div>
+      </div>
+      <div class="bg-brand-surface dark:bg-brand-darkSurface2 p-3.5 rounded-xl border border-brand-border dark:border-brand-darkBorder text-xs space-y-2">
+        <p class="text-brand-slate dark:text-slate-300">Are you sure you want to cancel Token <strong id="cancelModalTokenId" class="font-mono text-brand-darkForest dark:text-white">#GCU-108</strong>?</p>
+        <div class="p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-800 dark:text-emerald-300 flex items-center justify-between">
+          <span>Refund to Wallet:</span>
+          <span id="cancelModalRefundAmount" class="font-mono font-black text-sm">₹120.00</span>
+        </div>
+      </div>
+      <div class="flex gap-2 pt-1">
+        <button onclick="closeCancelModal()" class="w-1/2 py-2.5 rounded-xl bg-brand-surface dark:bg-brand-darkSurface2 font-semibold text-xs text-brand-darkForest dark:text-white">
+          Keep Token
+        </button>
+        <button onclick="confirmCancelOrder()" class="w-1/2 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs transition">
+          Yes, Cancel & Refund
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: RUSH GUARANTEE POLICY POP-UP            -->
+  <!-- ============================================== -->
+  <div id="rushGuaranteeModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm hidden">
+    <div class="bg-brand-cream dark:bg-brand-darkSurface border border-brand-border dark:border-brand-darkBorder rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 relative">
+      <button onclick="closeRushGuaranteeModal()" class="absolute top-4 right-4 text-brand-muted hover:text-brand-darkForest dark:hover:text-white">
+        <i data-lucide="x" class="w-4 h-4"></i>
+      </button>
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-brand-mint text-brand-mintDark flex items-center justify-center font-bold">
+          <i data-lucide="shield-check" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h3 class="font-extrabold text-base text-brand-darkForest dark:text-white">GCU Rush Guarantee Policy</h3>
+          <p class="text-xs text-brand-muted">20-Minute Zero Waiting Time Promise</p>
+        </div>
+      </div>
+      <div class="space-y-2.5 text-xs text-brand-slate dark:text-slate-300 leading-relaxed">
+        <div class="p-3 rounded-xl bg-brand-surface dark:bg-brand-darkSurface2 border border-brand-border dark:border-brand-darkBorder space-y-1">
+          <p class="font-bold text-brand-darkForest dark:text-white flex items-center gap-1.5">
+            <i data-lucide="clock" class="w-4 h-4 text-brand-accent"></i>
+            <span>Max 20-Minute Fulfillment Guarantee</span>
+          </p>
+          <p class="text-[11px] text-brand-muted">If your token preparation takes longer than 20 minutes from booking, you receive an automated <strong>20% instant cashback</strong> directly to your GCU Digital Wallet balance.</p>
+        </div>
+        <div class="p-3 rounded-xl bg-brand-surface dark:bg-brand-darkSurface2 border border-brand-border dark:border-brand-darkBorder space-y-1">
+          <p class="font-bold text-brand-darkForest dark:text-white flex items-center gap-1.5">
+            <i data-lucide="zap" class="w-4 h-4 text-amber-500"></i>
+            <span>Priority Fast-Track Lane</span>
+          </p>
+          <p class="text-[11px] text-brand-muted">Pre-ordered tokens are prepared in dedicated kitchen & print stations ahead of walk-in counter queues during peak class intervals.</p>
+        </div>
+      </div>
+      <button onclick="closeRushGuaranteeModal()" class="w-full py-2.5 rounded-xl bg-brand-darkForest text-white font-bold text-xs transition">
+        Understood, Close
+      </button>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: LEAVE REVIEW & RATING (STUDENT)         -->
+  <!-- ============================================== -->
+  <div id="reviewOrderModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm hidden">
+    <div class="bg-brand-cream dark:bg-brand-darkSurface border border-brand-border dark:border-brand-darkBorder rounded-2xl max-w-md w-full p-5 shadow-2xl space-y-4 relative">
+      <button onclick="closeReviewModal()" class="absolute top-4 right-4 text-brand-muted hover:text-brand-darkForest dark:hover:text-white">
+        <i data-lucide="x" class="w-4 h-4"></i>
+      </button>
+      <div class="space-y-1">
+        <h3 class="font-bold text-base text-brand-darkForest dark:text-white flex items-center gap-2">
+          <i data-lucide="star" class="w-4 h-4 text-amber-500 fill-amber-500"></i>
+          <span>Rate & Review Campus Stall</span>
+        </h3>
+        <p class="text-xs text-brand-muted">Your review syncs directly to the vendor's dashboard</p>
+      </div>
+
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="block font-semibold mb-1 text-brand-darkForest dark:text-white">Select GCU Outlet</label>
+          <select id="reviewOutletSelect" class="w-full px-3 py-2 rounded-xl bg-white dark:bg-brand-darkBg border border-brand-border dark:border-brand-darkBorder font-medium focus:outline-none">
+            <option value="food-court">1. Main GCU Food Court</option>
+            <option value="grill-street">2. The GCU Grill & Street Food Stall</option>
+            <option value="south-bites">3. GCU South Bites Stall</option>
+            <option value="bakery-hub">4. GCU Bakery & Snack Hub</option>
+            <option value="juicy-bar">5. GCU Juicy & Shake Bar</option>
+            <option value="stationery-print">6. GCU Central Stationery & Print Shop</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block font-semibold mb-1.5 text-brand-darkForest dark:text-white">Your Star Rating</label>
+          <div class="flex items-center gap-2" id="starRatingContainer">
+            <button type="button" onclick="setStarRating(1)" class="star-btn text-2xl text-amber-400 hover:scale-110 transition">★</button>
+            <button type="button" onclick="setStarRating(2)" class="star-btn text-2xl text-amber-400 hover:scale-110 transition">★</button>
+            <button type="button" onclick="setStarRating(3)" class="star-btn text-2xl text-amber-400 hover:scale-110 transition">★</button>
+            <button type="button" onclick="setStarRating(4)" class="star-btn text-2xl text-amber-400 hover:scale-110 transition">★</button>
+            <button type="button" onclick="setStarRating(5)" class="star-btn text-2xl text-amber-400 hover:scale-110 transition">★</button>
+            <span id="starRatingLabel" class="ml-2 font-bold text-brand-darkForest dark:text-white text-xs">5 / 5 Stars (Excellent)</span>
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-semibold mb-1 text-brand-darkForest dark:text-white">Written Feedback</label>
+          <textarea id="reviewCommentInput" rows="3" placeholder="Tell other GCU students about food taste, queue speed, or print quality..." class="w-full px-3 py-2 rounded-xl bg-white dark:bg-brand-darkBg border border-brand-border dark:border-brand-darkBorder focus:outline-none"></textarea>
+        </div>
+      </div>
+
+      <button onclick="submitStudentReview()" class="w-full py-2.5 rounded-xl bg-brand-darkForest hover:bg-brand-darkForestHover text-white font-bold text-xs transition">
+        Submit Review to GCU Portal
+      </button>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- FLOATING CART & ORDER DRAWER                   -->
+  <!-- ============================================== -->
+  <div id="cartDrawer" class="fixed inset-0 z-50 overflow-hidden pointer-events-none transition-opacity duration-300 opacity-0 hidden">
+    <div onclick="toggleCartDrawer(false)" class="absolute inset-0 bg-black/50 backdrop-blur-xs pointer-events-auto"></div>
+    <div class="absolute inset-y-0 right-0 max-w-full flex pl-8">
+      <div class="w-screen max-w-md bg-brand-cream dark:bg-brand-darkSurface border-l border-brand-border dark:border-brand-darkBorder p-5 flex flex-col pointer-events-auto shadow-2xl relative">
+        <div class="flex items-center justify-between pb-3 border-b border-brand-border dark:border-brand-darkBorder">
+          <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-xl bg-brand-mint text-brand-mintDark flex items-center justify-center font-bold">
+              <i data-lucide="shopping-cart" class="w-4 h-4"></i>
+            </div>
+            <div>
+              <h3 class="font-bold text-sm text-brand-darkForest dark:text-white">Your Pre-Order Cart</h3>
+              <p class="text-[10px] text-brand-muted">Multi-outlet token checkout</p>
+            </div>
+          </div>
+          <button onclick="toggleCartDrawer(false)" class="p-1 rounded-lg text-brand-muted hover:text-brand-darkForest dark:hover:text-white">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+
+        <div id="cartItemsContainer" class="flex-grow overflow-y-auto custom-scroll py-3 space-y-3">
+          <!-- Injected items -->
+        </div>
+
+        <div class="border-t border-brand-border dark:border-brand-darkBorder pt-3 space-y-2 text-xs">
+          <div class="flex justify-between text-brand-muted">
+            <span>Items Subtotal</span>
+            <span id="cartSubtotal" class="font-mono font-semibold text-brand-darkForest dark:text-white">₹0.00</span>
+          </div>
+          <div id="peakRewardLine" class="flex justify-between text-emerald-700 dark:text-emerald-400 font-semibold hidden">
+            <span>🎁 Peak-Shift Reward (10% Cashback)</span>
+            <span id="cartRewardDiscount" class="font-mono">-₹0.00</span>
+          </div>
+          <div class="flex justify-between font-bold text-sm text-brand-darkForest dark:text-white pt-1 border-t border-brand-border dark:border-brand-darkBorder">
+            <span>Total Payable</span>
+            <span id="cartTotal" class="font-mono font-black text-brand-mintDark dark:text-brand-mint">₹0.00</span>
+          </div>
+          <button id="placeOrderBtn" onclick="handlePlaceOrder()" class="w-full py-3 rounded-xl bg-brand-darkForest hover:bg-brand-darkForestHover text-white dark:bg-brand-mint dark:text-brand-darkForest font-black text-xs sm:text-sm shadow-md transition flex items-center justify-center gap-1.5">
+            <i data-lucide="zap" class="w-4 h-4"></i>
+            <span>Place Pre-Order & Generate Token</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Box -->
+  <div id="toastContainer" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- Embedded Application JavaScript Engine -->
+  <script>
+    /* =========================================================================
+       NoMoreQ • Garden City University Smart Queue & Campus Marketplace Engine
+       ========================================================================= */
+
+    // 1. Core Data Constants
+    const SHOPS = [
+      { id: "food-court", name: "Main GCU Food Court", desc: "North/South Indian Meals, Thalis, Combos", badge: "Peak Rush", waitMins: 22, icon: "utensils", open: true, hours: "08:30 AM - 07:30 PM" },
+      { id: "grill-street", name: "The GCU Grill & Street Food Stall", desc: "Rolls, Burgers, Momos, Shawarma", badge: "Moderate", waitMins: 12, icon: "flame", open: true, hours: "10:00 AM - 08:00 PM" },
+      { id: "south-bites", name: "GCU South Bites Stall", desc: "Dosa, Idli, Vada, Filter Coffee", badge: "Low Crowd", waitMins: 4, icon: "coffee", open: true, hours: "07:30 AM - 06:30 PM" },
+      { id: "bakery-hub", name: "GCU Bakery & Snack Hub", desc: "Puffs, Sandwiches, Pastries, Samosas", badge: "Low Crowd", waitMins: 3, icon: "croissant", open: true, hours: "08:30 AM - 07:00 PM" },
+      { id: "juicy-bar", name: "GCU Juicy & Shake Bar", desc: "Fresh Juices, Smoothies, Milkshakes, Ice Teas", badge: "Moderate", waitMins: 8, icon: "cup-soda", open: true, hours: "09:00 AM - 08:30 PM" },
+      { id: "stationery-print", name: "GCU Central Stationery & Print Shop", desc: "Xerox, Printouts, Lab Records, Stationery", badge: "High Demand", waitMins: 18, icon: "printer", open: true, hours: "08:00 AM - 06:00 PM" }
+    ];
+
+    const DEFAULT_CATALOG = [
+      { id: "item-1", shopId: "food-court", name: "GCU Maharaja Special Thali", price: 120, desc: "Paneer, Dal Makhani, 2 Butter Rotis, Rice, Gulab Jamun", tag: "Best Seller", inStock: true },
+      { id: "item-2", shopId: "food-court", name: "Hyderabadi Dum Biryani Bowl", price: 140, desc: "Basmati rice layered with aromatics and raita", tag: "Chef Special", inStock: true },
+      { id: "item-3", shopId: "food-court", name: "Comfort Curd Rice & Pickle", price: 60, desc: "Tempered south style curd rice with pomegranate", tag: "Healthy", inStock: true },
+      { id: "item-4", shopId: "grill-street", name: "GCU Signature Chicken Shawarma", price: 110, desc: "Slow roasted chicken, garlic toum, warm rumali", tag: "Popular", inStock: true },
+      { id: "item-5", shopId: "grill-street", name: "Paneer Tikka Kathi Roll", price: 90, desc: "Tandoori spiced paneer wrapped in flaky paratha", tag: "Veg Hot", inStock: true },
+      { id: "item-6", shopId: "grill-street", name: "Crispy Zinger Burger + Fries", price: 130, desc: "Fried fillet, secret sauce and salted french fries", tag: "Combo", inStock: true },
+      { id: "item-7", shopId: "south-bites", name: "Mysore Masala Ghee Dosa", price: 65, desc: "Golden crepe with red chili garlic chutney & potato", tag: "Must Try", inStock: true },
+      { id: "item-8", shopId: "south-bites", name: "Steamed Idli-Vada Combo (2+1)", price: 50, desc: "Steamed fluffy idlis with crispy medu vada & sambhar", tag: "Quick Grab", inStock: true },
+      { id: "item-9", shopId: "south-bites", name: "GCU Degree Filter Coffee", price: 25, desc: "Freshly brewed brass dabarah filter coffee", tag: "Energizer", inStock: true },
+      { id: "item-10", shopId: "bakery-hub", name: "Flaky Veggie Puff / Egg Puff", price: 25, desc: "Golden crust pastry with spiced potato or egg", tag: "Snack Deal", inStock: true },
+      { id: "item-11", shopId: "bakery-hub", name: "Grilled Cheese Corn Sandwich", price: 60, desc: "Melted mozzarella, sweet corn & herbs", tag: "Cheesy", inStock: true },
+      { id: "item-12", shopId: "bakery-hub", name: "Dutch Chocolate Truffle Pastry", price: 65, desc: "Dark chocolate ganache layered sponge slice", tag: "Dessert", inStock: true },
+      { id: "item-13", shopId: "juicy-bar", name: "Fresh Watermelon Juice Cooler", price: 50, desc: "Cold pressed seedless melon with mint", tag: "Refresher", inStock: true },
+      { id: "item-14", shopId: "juicy-bar", name: "Thick Belgian Chocolate Shake", price: 85, desc: "Dairy ice cream shake with chocolate drizzle", tag: "Indulgent", inStock: true },
+      { id: "item-15", shopId: "stationery-print", name: "B&W Document Printout (10 Sheets)", price: 20, desc: "High-speed laser printing for class notes & reports", tag: "Essential", inStock: true },
+      { id: "item-16", shopId: "stationery-print", name: "Color Glossy Printout (Per Page)", price: 15, desc: "High resolution vibrant charts & diagram sheets", tag: "Lab Reports", inStock: true },
+      { id: "item-17", shopId: "stationery-print", name: "GCU Official Lab Record Manual", price: 150, desc: "Official university experiment logbook with index", tag: "Mandatory", inStock: true },
+      { id: "item-18", shopId: "stationery-print", name: "Spiral Binding with Clear Cover", price: 45, desc: "Heavy duty coil binding with thick transparent shield", tag: "Projects", inStock: true }
+    ];
+
+    const DEFAULT_SEED_ORDERS = [
+      { id: "GCU-108", shopId: "food-court", shopName: "Main GCU Food Court", student: "Rahul Sharma", email: "rahul.s@gcu.edu.in", items: [{ name: "GCU Maharaja Special Thali", qty: 1, price: 120 }], total: 120, status: "ready", time: "12:45 PM" },
+      { id: "GCU-109", shopId: "stationery-print", shopName: "GCU Central Stationery & Print Shop", student: "Aishwarya Rai", email: "aishwarya.r@gcu.edu.in", items: [{ name: "B&W Document Printout (10 Sheets)", qty: 2, price: 20 }, { name: "Spiral Binding with Clear Cover", qty: 1, price: 45 }], total: 85, status: "preparing", time: "12:50 PM" },
+      { id: "GCU-110", shopId: "grill-street", shopName: "The GCU Grill & Street Food Stall", student: "Vikram Mehta", email: "vikram.m@gcu.edu.in", items: [{ name: "GCU Signature Chicken Shawarma", qty: 1, price: 110 }], total: 110, status: "received", time: "12:55 PM" },
+      { id: "GCU-111", shopId: "south-bites", shopName: "GCU South Bites Stall", student: "Karthik Nair", email: "karthik.n@gcu.edu.in", items: [{ name: "Mysore Masala Ghee Dosa", qty: 1, price: 65 }, { name: "GCU Degree Filter Coffee", qty: 1, price: 25 }], total: 90, status: "ready", time: "12:42 PM" },
+      { id: "GCU-112", shopId: "juicy-bar", shopName: "GCU Juicy & Shake Bar", student: "Sneha George", email: "sneha.g@gcu.edu.in", items: [{ name: "Thick Belgian Chocolate Shake", qty: 1, price: 85 }], total: 85, status: "preparing", time: "12:52 PM" },
+      { id: "GCU-113", shopId: "stationery-print", shopName: "GCU Central Stationery & Print Shop", student: "Mohit Deshmukh", email: "mohit.d@gcu.edu.in", items: [{ name: "GCU Official Lab Record Manual", qty: 1, price: 150 }], total: 150, status: "received", time: "1:02 PM" }
+    ];
+
+    const DEFAULT_PROMOS = [
+      { code: "GCU10", discount: 10, title: "10% Student Welcome Perk", active: true },
+      { code: "RUSHHOUR20", discount: 20, title: "20% Off-Peak Dining Deal", active: true },
+      { code: "PRINT5", discount: 5, title: "₹5 Flat Discount on Binding", active: false }
+    ];
+
+    const DEFAULT_REVIEWS = [
+      { id: 1, shopId: "food-court", shopName: "Main GCU Food Court", student: "Rahul Sharma", email: "rahul.s@gcu.edu.in", rating: 5, comment: "GCU Maharaja Special Thali was super filling and hygienic! Pickup counter was fast.", date: "Today, 12:45 PM", reply: "Thank you Rahul! We always ensure hot meals during peak lunch hours." },
+      { id: 2, shopId: "stationery-print", shopName: "GCU Central Stationery & Print Shop", student: "Aishwarya Rai", email: "aishwarya.r@gcu.edu.in", rating: 5, comment: "Print shop finished my lab record and spiral binding in 5 mins before external viva! Lifesaver.", date: "Today, 11:30 AM", reply: "Glad to help Aishwarya! Best of luck for your exams." },
+      { id: 3, shopId: "south-bites", shopName: "GCU South Bites Stall", student: "Priya Mohan", email: "priya.m@gcu.edu.in", rating: 4, comment: "Dosa was crisp and filter coffee was piping hot at South Bites. Quick counter pickup!", date: "Today, 10:15 AM", reply: "" },
+      { id: 4, shopId: "grill-street", shopName: "The GCU Grill & Street Food Stall", student: "Anand Kumar", email: "anand.k@gcu.edu.in", rating: 5, comment: "Pre-ordered Shawarma roll and picked it up right when token turned green. No queue waiting.", date: "Yesterday, 04:20 PM", reply: "Thanks Anand, appreciate your loyalty!" },
+      { id: 5, shopId: "bakery-hub", shopName: "GCU Bakery & Snack Hub", student: "Sneha George", email: "sneha.g@gcu.edu.in", rating: 5, comment: "Fresh paneer puffs and egg puffs are always warm. Pre-ordering saves 15 mins during 11 AM break.", date: "Yesterday, 11:05 AM", reply: "" },
+      { id: 6, shopId: "juicy-bar", shopName: "GCU Juicy & Shake Bar", student: "Vikram Mehta", email: "vikram.m@gcu.edu.in", rating: 5, comment: "Thick Belgian chocolate shake is heavenly after sports practice. Pure energy!", date: "2 days ago", reply: "Glad you loved it Vikram! Try our Avocado smoothie next." }
+    ];
+
+    // Local Storage Keys
+    const K_USER = "nomoreq_user";
+    const K_ORDERS = "nomoreq_orders";
+    const K_CATALOG = "nomoreq_catalog";
+    const K_CART = "nomoreq_cart";
+    const K_WALLET = "nomoreq_wallet";
+    const K_PROMOS = "nomoreq_promos";
+    const K_REVIEWS = "nomoreq_reviews";
+    const K_THEME = "nomoreq_theme";
+    const K_VOICE = "nomoreq_voice";
+    const K_SOUND = "nomoreq_sound";
+    const K_ACTIVE_TAB = "nomoreq_active_tab";
+    const K_VENDOR_OUTLET = "nomoreq_vendor_outlet";
+
+    // Application Global State
+    let currentUser = null;
+    let currentRole = "student"; // 'student' or 'vendor'
+    let currentTab = "dashboard";
+    let vendorOutletId = "stationery-print";
+    let orders = [];
+    let catalog = [];
+    let cart = [];
+    let promos = [];
+    let reviews = [];
+    let walletBalance = 540;
+    let isDark = false;
+    let voiceEnabled = true;
+    let soundEnabled = true;
+    let peakRewardApplied = false;
+    let catalogSearchQuery = "";
+    let catalogFilterShop = "all";
+    let staffFilter = "all";
+    let studentReviewFilter = "all";
+    let targetTokenToPass = null;
+    let targetTokenToCancel = null;
+    let currentSelectedRating = 5;
+
+    // Web Audio Sound Chime
+    function playAudioChime() {
+      if (!soundEnabled) return;
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(587.33, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.15);
+        gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.35);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.36);
+      } catch (e) {
+        console.warn("Audio Context error", e);
+      }
+    }
+
+    // AI SpeechSynthesis Voice Assistant
+    function triggerVoiceAnnouncement(tokenId, shopName) {
+      if (!voiceEnabled || !soundEnabled) return;
+      if (!('speechSynthesis' in window)) return;
+      playAudioChime();
+      const text = `Attention: Token ${tokenId} is now ready for pickup at ${shopName}, Garden City University!`;
+      try {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.rate = 0.95;
+        utterance.pitch = 1.05;
+        window.speechSynthesis.speak(utterance);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    function testVoiceAnnouncement() {
+      playAudioChime();
+      triggerVoiceAnnouncement("GCU-108", "Main GCU Food Court");
+      showToast("Testing Voice Announcement: Token #GCU-108", "info");
+    }
+
+    // 2. Initialization & LocalStorage Hydration
+    document.addEventListener("DOMContentLoaded", () => {
+      // LocalStorage bootstrapping
+      if (!localStorage.getItem(K_ORDERS)) localStorage.setItem(K_ORDERS, JSON.stringify(DEFAULT_SEED_ORDERS));
+      if (!localStorage.getItem(K_CATALOG)) localStorage.setItem(K_CATALOG, JSON.stringify(DEFAULT_CATALOG));
+      if (!localStorage.getItem(K_PROMOS)) localStorage.setItem(K_PROMOS, JSON.stringify(DEFAULT_PROMOS));
+      if (!localStorage.getItem(K_REVIEWS)) localStorage.setItem(K_REVIEWS, JSON.stringify(DEFAULT_REVIEWS));
+
+      orders = JSON.parse(localStorage.getItem(K_ORDERS) || "[]");
+      catalog = JSON.parse(localStorage.getItem(K_CATALOG) || "[]");
+      cart = JSON.parse(localStorage.getItem(K_CART) || "[]");
+      promos = JSON.parse(localStorage.getItem(K_PROMOS) || "[]");
+      reviews = JSON.parse(localStorage.getItem(K_REVIEWS) || "[]");
+      walletBalance = parseFloat(localStorage.getItem(K_WALLET) || "540");
+      isDark = localStorage.getItem(K_THEME) === "dark";
+      voiceEnabled = localStorage.getItem(K_VOICE) !== "false";
+      soundEnabled = localStorage.getItem(K_SOUND) !== "false";
+      vendorOutletId = localStorage.getItem(K_VENDOR_OUTLET) || "stationery-print";
+
+      applyTheme();
+      updateVoiceUI();
+      updateSoundUI();
+      initLiveClock();
+
+      // Session verification
+      const savedUser = localStorage.getItem(K_USER);
+      if (savedUser) {
+        currentUser = JSON.parse(savedUser);
+        currentRole = currentUser.role || "student";
+        currentTab = currentRole === "student" ? "dashboard" : "v-dashboard";
+        applyUserSession();
+      } else {
+        openLoginModal();
+      }
+
+      if (window.lucide) lucide.createIcons();
+    });
+
+    // 3. Navigation Sidebar & Routing
+    function toggleSidebar(open) {
+      const sidebar = document.getElementById("mainSidebar");
+      const backdrop = document.getElementById("sidebarBackdrop");
+      if (open) {
+        sidebar.classList.remove("-translate-x-full");
+        backdrop.classList.remove("opacity-0", "pointer-events-none");
+      } else {
+        sidebar.classList.add("-translate-x-full");
+        backdrop.classList.add("opacity-0", "pointer-events-none");
+      }
+    }
+
+    function navigateToTab(tabId) {
+      currentTab = tabId;
+      toggleSidebar(false);
+      renderSidebarNav();
+      renderCurrentView();
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function renderSidebarNav() {
+      const navContainer = document.getElementById("sidebarNavItems");
+      if (!navContainer) return;
+
+      if (currentRole === "student") {
+        const studentTabs = [
+          { id: "dashboard", label: "Dashboard & Nudges", icon: "layout-dashboard" },
+          { id: "shops", label: "Shops & Pre-Order", icon: "shopping-bag" },
+          { id: "tokens", label: "Digital Tokens", icon: "ticket" },
+          { id: "reviews", label: "Reviews & Ratings", icon: "star" },
+          { id: "notifications", label: "Notifications & Alerts", icon: "bell" },
+          { id: "wallet", label: "Payments & GCU Wallet", icon: "wallet" },
+          { id: "settings", label: "Settings & Voice AI", icon: "settings" }
+        ];
+
+        navContainer.innerHTML = studentTabs.map(t => `
+          <button onclick="navigateToTab('${t.id}')" class="w-full px-3.5 py-2.5 rounded-xl font-bold text-xs flex items-center gap-3 transition ${currentTab === t.id ? 'bg-brand-darkForest text-white dark:bg-brand-mint dark:text-brand-darkForest shadow-sm' : 'text-brand-darkForest dark:text-slate-200 hover:bg-brand-surface dark:hover:bg-brand-darkSurface2'}">
+            <i data-lucide="${t.icon}" class="w-4 h-4"></i>
+            <span>${t.label}</span>
+          </button>
+        `).join("");
+      } else {
+        // Vendor / Shop Manager Navigation Options (9 items specified)
+        const vendorTabs = [
+          { id: "v-dashboard", label: "1. Vendor Dashboard", icon: "bar-chart-3" },
+          { id: "v-orders", label: "2. Active Orders & Tokens", icon: "package" },
+          { id: "v-menu", label: "3. Menu & Inventory", icon: "utensils" },
+          { id: "v-payments", label: "4. Payments & Invoices", icon: "receipt" },
+          { id: "v-offers", label: "5. Offers & Discounts", icon: "tag" },
+          { id: "v-reviews", label: "6. Reviews & Ratings", icon: "star" },
+          { id: "v-hours", label: "7. Working Hours & Status", icon: "clock" },
+          { id: "v-notifications", label: "8. Vendor Notifications", icon: "bell-ring" },
+          { id: "v-settings", label: "9. Vendor Settings & AI", icon: "sliders" }
+        ];
+
+        navContainer.innerHTML = vendorTabs.map(t => `
+          <button onclick="navigateToTab('${t.id}')" class="w-full px-3 py-2 rounded-xl font-bold text-xs flex items-center gap-2.5 transition ${currentTab === t.id ? 'bg-brand-darkForest text-white dark:bg-brand-mint dark:text-brand-darkForest shadow-sm' : 'text-brand-darkForest dark:text-slate-200 hover:bg-brand-surface dark:hover:bg-brand-darkSurface2'}">
+            <i data-lucide="${t.icon}" class="w-4 h-4 shrink-0"></i>
+            <span class="truncate">${t.label}</span>
+          </button>
+        `).join("");
+      }
+
+      if (window.lucide) lucide.createIcons();
+    }
+
+    // 4. View Router & Renderers
+    function renderCurrentView() {
+      const container = document.getElementById("mainAppContent");
+      if (!container) return;
+
+      if (currentRole === "student") {
+        if (currentTab === "dashboard") renderStudentDashboard(container);
+        else if (currentTab === "shops") renderShopsCatalogView(container);
+        else if (currentTab === "tokens") renderDigitalTokensView(container);
+        else if (currentTab === "reviews") renderStudentReviewsView(container);
+        else if (currentTab === "notifications") renderNotificationsView(container);
+        else if (currentTab === "wallet") renderWalletView(container);
+        else if (currentTab === "settings") renderSettingsView(container);
+      } else {
+        // Vendor Views
+        if (currentTab === "v-dashboard") renderVendorDashboard(container);
+        else if (currentTab === "v-orders") renderVendorOrders(container);
+        else if (currentTab === "v-menu") renderVendorMenu(container);
+        else if (currentTab === "v-payments") renderVendorPayments(container);
+        else if (currentTab === "v-offers") renderVendorOffers(container);
+        else if (currentTab === "v-reviews") renderVendorReviews(container);
+        else if (currentTab === "v-hours") renderVendorHours(container);
+        else if (currentTab === "v-notifications") renderVendorNotifications(container);
+        else if (currentTab === "v-settings") renderVendorSettings(container);
+      }
+
+      if (window.lucide) lucide.createIcons();
+    }
+
+    /* -------------------------------------------------------------
+       STUDENT VIEWS
+       ------------------------------------------------------------- */
+    function renderStudentDashboard(container) {
+      container.innerHTML = `
+        <!-- Demand Redistribution Layer (Smart Nudges) -->
+        <section class="space-y-4">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-brand-mint text-brand-mintDark border border-brand-mintDark/20">
+                  AI Demand Redistribution
+                </span>
+                <h2 class="text-xl font-extrabold text-brand-darkForest dark:text-white">Smart Campus Nudges</h2>
+              </div>
+              <p class="text-xs text-brand-muted dark:text-slate-400">Real-time load balancing to help you bypass crowds and score cashback</p>
+            </div>
+            <div class="bg-brand-surface dark:bg-brand-darkSurface border border-brand-border dark:border-brand-darkBorder p-2.5 px-4 rounded-2xl flex items-center gap-3 shadow-xs">
+              <div class="text-right">
+                <p class="text-[10px] text-brand-muted uppercase font-bold tracking-wider">Campus Crowd Load</p>
+                <p class="text-sm font-black text-rose-600 dark:text-rose-400 font-mono">78% • High Rush</p>
+              </div>
+              <div class="w-9 h-9 rounded-xl bg-rose-500/15 text-rose-700 dark:text-rose-300 flex items-center justify-center font-bold">
+                <i data-lucide="flame" class="w-4 h-4"></i>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3 Smart Nudge Cards -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-brand-surface dark:bg-brand-darkSurface border border-brand-border dark:border-brand-darkBorder p-4 rounded-2xl shadow-xs flex flex-col justify-between space-y-3">
+              <div class="space-y-1.5">
+                <div class="flex justify-between items-center text-[10px] font-extrabold">
+                  <span class="px-2 py-0.5 rounded-md bg-brand-mint text-brand-mintDark">⚡ QUICK PICKUP</span>
+                  <span class="text-emerald-700 dark:text-emerald-400">Save ~18 Mins</span>
+                </div>
+                <h3 class="font-bold text-sm text-brand-darkForest dark:text-white leading-snug">Pre-order at GCU South Bites</h3>
+                <p class="text-xs text-brand-muted">Pickup in <strong>6 mins</strong>, zero queue at counter! Fresh filter coffee ready.</p>
+              </div>
+              <button onclick="acceptNudge('south-bites')" class="w-full py-2 rounded-xl bg-brand-darkForest hover:bg-brand-darkForestHover text-white font-bold text-xs transition flex items-center justify-center gap-1.5">
+                <span>Accept Nudge & Pre-Order</span>
+                <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+
+            <div class="bg-brand-surface dark:bg-brand-darkSurface border border-brand-border dark:border-brand-darkBorder p-4 rounded-2xl shadow-xs flex flex-col justify-between space-y-3">
+              <div class="space-y-1.5">
+                <div class="flex justify-between items-center text-[10px] font-extrabold">
+                  <span class="px-2 py-0.5 rounded-md bg-amber-500/15 text-amber-800 dark:text-amber-200">🎁 PEAK-SHIFT REWARD</span>
+                  <span class="text-amber-600 dark:text-amber-400">+10% Cashback</span>
+                </div>
+                <h3 class="font-bold text-sm text-brand-darkForest dark:text-white leading-snug">Book 1:45 PM – 2:00 PM Slot</h3>
+                <p class="text-xs text-brand-muted">Order ahead for post-rush window and receive <strong>10% instant cashback</strong> to GCU Wallet.</p>
+              </div>
+              <button onclick="applyPeakShiftReward()" class="w-full py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs transition flex items-center justify-center gap-1.5">
+                <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+                <span>Claim Reward (10% Cashback)</span>
+              </button>
+            </div>
+
+            <div class="bg-brand-surface dark:bg-brand-darkSurface border border-brand-border dark:border-brand-darkBorder p-4 rounded-2xl shadow-xs flex flex-col justify-between space-y-3">
+              <div class="space-y-1.5">
+                <div class="flex justify-between items-center text-[10px] font-extrabold">
+                  <span class="px-2 py-0.5 rounded-md bg-blue-500/15 text-blue-800 dark:text-blue-200">📍 SMART ROUTE</span>
+                  <span class="text-blue-600 dark:text-blue-400">Desk Empty Now</span>
+                </div>
+                <h3 class="font-bold text-sm text-brand-darkForest dark:text-white leading-snug">Library Print Desk is Free</h3>
+                <p class="text-xs text-brand-muted">Print your lab records right now! Food court queues will decline in 11 minutes.</p>
+              </div>
+              <button onclick="acceptNudge('stationery-print')" class="w-full py-2 rounded-xl bg-brand-darkForest hover:bg-brand-darkForestHover text-white font-bold text-xs transition flex items-center justify-center gap-1.5">
+                <span>Book Print Job First</span>
+                <i data-lucide="printer" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- 6 Campus Outlets Occupancy Grid -->
+        <section class="space-y-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="text-lg sm:text-xl font-extrabold text-brand-darkForest dark:text-white">6 Campus Shops Occupancy</h2>
+              <p class="text-xs text-brand-muted">Live wait times and current queue volume</p>
+            </div>
+            <button onclick="renderStudentDashboard(document.getElementById('mainAppContent'))" class="px-3 py-1.5 rounded-xl border border-brand-border dark:border-brand-darkBorder bg-brand-surface dark:bg-brand-darkSurface text-xs font-semibold flex items-center gap-1.5">
+              <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+              <span>Refresh</span>
+            </button>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            ${SHOPS.map(shop => {
+              const active = orders.filter(o => o.shopId === shop.id && o.status !== "completed").length;
+              const wait = shop.waitMins + (active > 1 ? active * 2 : 0);
+              let badgeColor = "bg-brand-mint text-brand-mintDark";
+              if (shop.badge === "Peak Rush" || shop.badge === "High Demand") badgeColor = "bg-rose-500/15 text-rose-700 dark:text-rose-300";
+              else if (shop.badge === "Moderate") badgeColor = "bg-amber-500/15 text-amber-700 dark:text-amber-300";
+
+              const shopReviews = reviews.filter(r => r.shopId === shop.id);
+              const avgRating = shopReviews.length > 0
+                ? (shopReviews.reduce((sum, r) => sum + (Number(r.rating) || 5), 0) / shopReviews.length).toFixed(1)
+                : (shop.rating || 4.8);
+              const revCount = shopReviews.length;
+
+              return `
+                <div onclick="acceptNudge('${shop.id}')" class="bg-brand-surface dark:bg-brand-darkSurface border border-brand-border dark:border-brand-darkBorder p-4 rounded-2xl shadow-xs hover:shadow-md transition cursor-pointer flex flex-col justify-between space-y-3">
+                  <div class="space-y-2">
+                    <div class="flex items-start justify-between gap-2">
+                      <div class="flex items-center gap-2.5">
+                        <div class="w-9 h-9 rounded-xl bg-brand-cream dark:bg-brand-darkSurface2 flex items-center justify-center text-brand-darkForest dark:text-white">
+                          <i data-lucide="${shop.icon}" class="w-4 h-4"></i>
+                        </div>
+                        <div>
+                          <h4 class="font-bold text-xs sm:text-sm text-brand-darkForest dark:text-white">${shop.name}</h4>
+                          <p class="text-[10px] text-brand-muted line-clamp-1">${shop.desc}</p>
+                        </div>
+                      </div>
+                      <span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider shrink-0 ${badgeColor}">${shop.badge}</span>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2 pt-2 border-t border-brand-border dark:border-brand-darkBorder text-xs">
+                      <div>
+                        <span class="text-[10px] text-brand-muted block">Est. Wait</span>
+                        <span class="font-bold font-mono text-brand-darkForest dark:text-white">${wait} mins</span>
+                      </div>
+                      <div>
+                        <span class="text-[10px] text-brand-muted block">Active Tokens</span>
+                        <span class="font-bold font-mono text-brand-accent">${active} in queue</span>
+                      </div>
+                    </div>
+
+                    <!-- Dynamic Star Rating & Reviews Count -->
+                    <div class="flex items-center justify-between text-xs pt-1 border-t border-brand-border/60 dark:border-brand-darkBorder/60">
+                      <div class="flex items-center gap-1 font-bold text-amber-500">
+                        <span>★ ${avgRating}</span>
+                        <span class="text-brand-muted text-[10px]">(${revCount} reviews)</span>
+                      </div>
+                      <button onclick="event.stopPropagation(); openReviewModal('${shop.id}')" class="text-[10px] text-brand-darkForest dark:text-brand-mint font-bold hover:underline flex items-center gap-1">
+                        <i data-lucide="star" class="w-3 h-3 text-amber-500 fill-amber-500"></i>
+                        <span>+ Rate Stall</span>
+                      </button>
+                    </div>
+                  </div>
+                  <div class="flex items-center justify-between text-[11px] font-bold text-brand-darkForest dark:text-brand-mint pt-2 border-t border-brand-border dark:border-brand-darkBorder">
+                    <span>Order Ahead & Skip Line</span>
+                    <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+                  </div>
+                </div>
+              `;
+            }).join("")}
+          </div>
+        </section>
+
+        <!-- Chart.js Predictive Rush Curve -->
+        <section class="bg-brand-surface dark:bg-brand-darkSurface border border-brand-border dark:border-brand-darkBorder rounded-2xl p-5 shadow-xs space-y-4">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div>
+              <h3 class="font-bold text-sm text-brand-darkForest dark:text-white flex items-center gap-2">
+                <i data-lucide="trending-up" class="w-4 h-4 text-brand-accent"></i>
+                <span>Predicted GCU Rush Hours vs. Best Time to Visit</span>
+              </h3>
+              <p class="text-xs text-brand-muted">Foot-traffic patterns across campus food courts and Xerox desks</p>
+            </div>
+            <div class="flex items-center gap-2 text-xs">
+              <span class="px-2 py-0.5 rounded-full bg-brand-mint text-brand-mintDark font-bold">10:00 - 11:30 AM (Best)</span>
+              <span class="px-2 py-0.5 rounded-full bg-rose-500/15 text-rose-700 dark:text-rose-300 font-bold">12:45 - 1:45 PM (Peak)</span>
+            </div>
+          </div>
+          <div class="relative h-60 w-full">
+            <canvas id="rushHoursChart"></canvas>
+          </div>
+        </section>
+      `;
+
+      initRushChart();
+    }
+
+    function renderShopsCatalogView(container) {
+      let items = catalog.filter(i => i.inStock);
+      if (catalogFilterShop !== "all") items = items.filter(i => i.shopId === catalogFilterShop);
+      if (catalogSearchQuery) items = items.filter(i => i.name.toLowerCase().includes(catalogSearchQuery) || i.desc.toLowerCase().includes(catalogSearchQuery));
+
+      container.innerHTML = `
+        <div class="space-y-5">
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+            <div>
+              <h2 class="text-xl font-extrabold text-brand-darkForest dark:text-white">Multi-Outlet Catalog</h2>
+              <p class="text-xs text-brand-muted">Single bill checkout across food, beverages, and print services</p>
+            </div>
+            <div class="relative min-w-[280px]">
+              <i data-lucide="search" class="w-4 h-4 text-brand-muted absolute left-3 top-1/2 -translate-y-1/2"></i>
+              <input type="text" oninput="handleSearchCatalog(this.value)" value="${catalogSearchQuery}" placeholder="Search biryani, prints, puffs, coffee..." class="w-full pl-9 pr-4 py-2 rounded-xl bg-brand-surface dark:bg-brand-darkSurface border border-brand-border dark:border-brand-darkBorder text-xs text-brand-darkForest dark:text-white focus:outline-none" />
+            </div>
+          </div>
+
+          <!-- Shop Selector Filter Tabs -->
+          <div class="flex items-center gap-2 overflow-x-auto custom-scroll pb-2">
+            <button onclick="setCatalogFilter('all')" class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition shrink-0 ${catalogFilterShop === 'all' ? 'bg-brand-darkForest text-white dark:bg-brand-mint dark:text-brand-darkForest' : 'bg-brand-surface dark:bg-brand-darkSurface border border-brand-border dark:border-brand-darkBorder'}">All Outlets</button>
+            ${SHOPS.map(s => `
+              <button onclick="setCatalogFilter('${s.id}')" class="px-3.5 py-1.5 rounded-xl text-xs font-semibold transition shrink-0 ${catalogFilterShop === s.id ? 'bg-brand-darkForest text-white dark:bg-brand-mint dark:text-brand-darkForest' : 'bg-brand-surface dark:bg-brand-darkSurface border border-brand-border dark:border-brand-darkBorder'}">
+                ${s.name}
+              </button>
+            `).join("")}
+          </div>
+
+          <!-- Active Outlet Rating & Review Action Banner -->
+          ${catalogFilterShop !== 'all' ? (() => {
+            const currentShop = SHOPS.find(s => s.id === catalogFilterShop);
+            const sRevs = reviews.filter(r => r.shopId === catalogFilterShop);
+            const sAvg = sRevs.length > 0 
+              ? (sRevs.reduce((acc, r) => acc + (Number(r.rating) || 5), 0) / sRevs.length).toFixed(1)
+              : (currentShop ? currentShop.rating : 4.8);
+            return `
+              <div class="p-4 rounded-2xl bg-brand-surface dark:bg-brand-darkSurface border border-brand-border dark:border-brand-darkBorder flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-xl bg-brand-cream dark:bg-brand-darkSurface2 flex items-center justify-center text-brand-darkForest dark:text-white shrink-0">
+                    <i data-lucide="${currentShop ? currentShop.icon : 'store'}" class="w-5 h-5"></i>
+                  </div>
+                  <div>
+                    <h3 class="font-bold text-sm text-brand-darkForest dark:text-white">${currentShop ? currentShop.name : ''}</h3>
+                    <div class="flex flex-wrap items-center gap-2 text-xs mt-0.5">
+                      <span class="text-amber-500 font-bold font-mono">★ ${sAvg}</span>
+                      <span class="text-brand-muted text-[11px]">(${sRevs.length} verified reviews)</span>
+                      <span class="text-brand-muted text-[11px]">• Est. Wait: <strong>${currentShop ? currentShop.waitMins : 10} mins</strong></span>
+                    </div>
+                  </div>
+                </div>
+                <div class="flex items-center gap-2">
+                  <button onclick="openReviewModal('${catalogFilterShop}')" class="px-3 py-1.5 rounded-xl bg-brand-cream dark:bg-brand-darkSurface2 hover:bg-brand-surface border border-brand-border dark:border-brand-darkBorder font-bold text-xs flex items-center gap-1.5 transition">
+                    <i data-lucide="star" class="w-3.5 h-3.5 text-amber-500 fill-amber-500"></i>
+                    <span>+ Rate Stall</span>
+                  </button>
+                  <button onclick="navigateToTab('reviews'); setReviewFeedFilter('${catalogFilterShop}')" class="px-3 py-1.5 rounded-xl bg-brand-darkForest hover:bg-brand-darkForestHover text-white dark:bg-brand-mint dark:text-brand-darkForest font-bold text-xs flex items-center gap-1.5 transition">
+                    <i data-lucide="message-square" class="w-3.5 h-3.5"></i>
+                    <span>Read Reviews</span>
+                  </button>
+                </div>
+              </div>
+            `;
+          })() : ''}
+
+          <!-- Catalog Items Grid -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            ${items.map(item => {
+              const inCart = cart.find(c => c.id === item.id);
+              const qty = inCart ? inCart.qty : 0;
+              const shop = SHOPS.find(s => s.id === item.shopId);
+
+              return `
+                <div class="bg-brand-surface dark:bg-brand-darkSurface border border-brand-border dark:border-brand-darkBorder rounded-2xl p-4 flex flex-col justify-between space-y-3 shadow-xs hover:shadow-md transition">
+                  <div class="space-y-1.5">
+                    <div class="flex items-center justify-between text-[10px]">
+                      <span class="font-bold px-2 py-0.5 rounded-md bg-brand-cream dark:bg-brand-darkSurface2 border border-brand-border dark:border-brand-darkBorder truncate max-w-[140px]">${shop.name}</span>
+                      <span class="font-extrabold text-brand-accent">${item.tag || 'Popular'}</span>
+                    </div>
+                    <h4 class="font-bold text-xs sm:text-sm text-brand-darkForest dark:text-white leading-snug">${item.name}</h4>
+                    <p class="text-[11px] text-brand-muted leading-tight">${item.desc}</p>
+                  </div>
+                  <div class="pt-2 border-t border-brand-border dark:border-brand-darkBorder flex items-center justify-between">
+                    <span class="font-mono font-black text-sm text-brand-darkForest dark:text-white">₹${item.price.toFixed(2)}</span>
+                    ${qty > 0 ? `
+                      <div class="flex items-center gap-1.5 bg-brand-cream dark:bg-brand-darkSurface2 border border-brand-border dark:border-brand-darkBorder rounded-xl p-1 font-mono font-bold text-xs">
+                        <button onclick="updateCartItem('${item.id}', -1)" class="w-6 h-6 rounded-lg bg-brand-surface dark:bg-brand-darkSurface flex items-center justify-center">-</button>
+                        <span class="px-1">${qty}</span>
+                        <button onclick="updateCartItem('${item.id}', 1)" class="w-6 h-6 rounded-lg bg-brand-darkForest text-white dark:bg-brand-mint dark:text-brand-darkForest flex items-center justify-center">+</button>
+                      </div>
+                    ` : `
+                      <button onclick="addToCart('${item.id}')" class="px-3 py-1.5 rounded-xl bg-brand-darkForest hover:bg-brand-darkForestHover text-white dark:bg-brand-mint dark:text-brand-darkForest font-bold text-xs transition flex items-center gap-1">
+                        <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                        <span>Add</span>
+                      </button>
+                    `}
+                  </div>
+                </div>
+              `;
+            }).join("")}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderDigitalTokensView(container) {
+      const active = orders.filter(o => o.status !== "completed");
+      const completed = orders.filter(o => o.status === "completed");
+
+      container.innerHTML = `
+        <div class="space-y-5">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <h2 class="text-xl font-extrabold text-brand-darkForest dark:text-white flex items-center gap-2">
+                <i data-lucide="ticket" class="w-5 h-5 text-brand-accent"></i>
+                <span>Live Queue & Digital Tokens</span>
+              </h2>
+              <p class="text-xs text-brand-muted">Contactless pickup verification & token actions at GCU counters</p>
+            </div>
+            <!-- Rush Guarantee policy trigger button in header -->
+            <button onclick="openRushGuaranteeModal()" class="px-3.5 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-800 dark:text-amber-200 text-xs font-bold flex items-center gap-1.5 transition">
+              <i data-lucide="shield-check" class="w-4 h-4 text-amber-600 dark:text-amber-400"></i>
+              <span>⚡ GCU Rush Guarantee Policy</span>
+            </button>
+          </div>
+
+          ${active.length === 0 ? `
+            <div class="bg-brand-surface dark:bg-brand-darkSurface border border-brand-border dark:border-brand-darkBorder p-8 rounded-2xl text-center text-xs text-brand-muted space-y-3">
+              <i data-lucide="ticket-slash" class="w-12 h-12 mx-auto text-brand-muted/40"></i>
+              <div class="space-y-1">
+                <p class="font-bold text-sm text-brand-darkForest dark:text-white">No Active Queue Tokens</p>
+                <p>Pre-order from any of the 6 campus stalls to get a contactless token.</p>
+              </div>
+              <button onclick="navigateToTab('shops')" class="px-4 py-2 rounded-xl bg-brand-darkForest hover:bg-brand-darkForestHover text-white dark:bg-brand-mint dark:text-brand-darkForest font-bold text-xs transition">
+                Browse Campus Stalls & Pre-Order
+              </button>
+            </div>
+          ` : `
+            <div class="space-y-4">
+              ${active.map(order => {
+                let s1 = true;
+                let s2 = order.status === "preparing" || order.status === "ready";
+                let s3 = order.status === "ready";
+
+                return `
+                  <div class="bg-brand-surface dark:bg-brand-darkSurface border ${order.status === 'ready' ? 'border-emerald-500 dark:border-brand-mint ring-2 ring-emerald-500/30' : 'border-brand-border dark:border-brand-darkBorder'} rounded-2xl p-5 shadow-xs space-y-4">
+                    <div class="flex items-center justify-between pb-3 border-b border-brand-border dark:border-brand-darkBorder">
+                      <div>
+                        <div class="flex items-center gap-2">
+                          <span class="text-[10px] text-brand-muted uppercase font-bold tracking-wider">GCU Digital Token</span>
+                          <!-- Rush Guarantee Badge on Token Card -->
+                          <button onclick="openRushGuaranteeModal()" class="px-2 py-0.5 rounded-md bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-800 dark:text-amber-200 text-[10px] font-black uppercase tracking-wider flex items-center gap-1 transition" title="View 20-Min Rush Guarantee Policy">
+                            <i data-lucide="zap" class="w-3 h-3 text-amber-500"></i>
+                            <span>⚡ Rush Guarantee</span>
+                          </button>
+                        </div>
+                        <p class="text-2xl font-black text-brand-darkForest dark:text-white font-mono">#${order.id}</p>
+                        <p class="text-xs font-semibold text-brand-muted">${order.shopName}</p>
+                      </div>
+                      <div class="text-right">
+                        <span class="px-2.5 py-1 rounded-full text-xs font-black uppercase tracking-wider ${order.status === 'ready' ? 'bg-emerald-500 text-white animate-pulse' : order.status === 'preparing' ? 'bg-amber-500/20 text-amber-800 dark:text-amber-200' : 'bg-brand-cream dark:bg-brand-darkSurface2 text-brand-darkForest dark:text-white'}">
+                          ${order.status === 'ready' ? '🟢 Ready for Pickup!' : order.status === 'preparing' ? '🟡 In Preparation' : '⚪ Order Received'}
+                        </span>
+                        <p class="text-[10px] text-brand-muted mt-1 font-mono">Booked at ${order.time}</p>
+                      </div>
+                    </div>
+
+                    <!-- 3-Step Animated Progress Bar -->
+                    <div class="grid grid-cols-3 gap-2 text-center text-[10px] font-bold">
+                      <div class="p-2 rounded-xl ${s1 ? 'bg-brand-mint text-brand-mintDark' : 'bg-brand-cream text-brand-muted'}">1. Received</div>
+                      <div class="p-2 rounded-xl ${s2 ? 'bg-amber-500/20 text-amber-800 dark:text-amber-200' : 'bg-brand-cream text-brand-muted'}">2. In Preparation / Print</div>
+                      <div class="p-2 rounded-xl ${s3 ? 'bg-emerald-500 text-white animate-pulse' : 'bg-brand-cream text-brand-muted'}">3. Ready at Counter!</div>
+                    </div>
+
+                    <div class="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-brand-border dark:border-brand-darkBorder text-xs">
+                      <div>
+                        <span class="text-brand-muted block sm:inline">Items: <strong>${order.items.map(i => `${i.qty}x ${i.name}`).join(", ")}</strong></span>
+                        <span class="text-brand-darkForest dark:text-white font-mono font-bold sm:ml-2">Total: ₹${order.total.toFixed(2)}</span>
+                      </div>
+                      
+                      <!-- Token Action Buttons (All 100% Functional) -->
+                      <div class="flex flex-wrap items-center gap-2">
+                        <!-- Rate & Review Button for Ready orders -->
+                        ${order.status === 'ready' ? `
+                          <button onclick="openReviewModal('${order.shopId}', '${order.id}')" class="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs flex items-center gap-1.5 shadow-xs transition">
+                            <i data-lucide="star" class="w-3.5 h-3.5 fill-current"></i>
+                            <span>Leave Review</span>
+                          </button>
+                        ` : ''}
+
+                        <!-- Pass Token to Friend Button -->
+                        <button onclick="passTokenToFriend('${order.id}')" class="px-3 py-1.5 rounded-xl bg-brand-cream dark:bg-brand-darkSurface2 hover:bg-brand-surface dark:hover:bg-brand-darkSurface border border-brand-border dark:border-brand-darkBorder font-semibold text-xs text-brand-darkForest dark:text-white flex items-center gap-1.5 transition">
+                          <i data-lucide="user-plus" class="w-3.5 h-3.5 text-brand-accent"></i>
+                          <span>Pass to Friend</span>
+                        </button>
+
+                        <!-- Cancel Order Button -->
+                        <button onclick="cancelStudentOrder('${order.id}')" class="px-3 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/20 font-semibold text-xs flex items-center gap-1 transition">
+                          <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                          <span>Cancel Order</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                `;
+              }).join("")}
+            </div>
+          `}
+
+          <!-- Completed Orders Section (Leave Review) -->
+          ${completed.length > 0 ? `
+            <div class="pt-4 space-y-3">
+              <h3 class="font-extrabold text-sm text-brand-darkForest dark:text-white flex items-center gap-2">
+                <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-600"></i>
+                <span>Completed Orders (Leave Feedback)</span>
+              </h3>
+              <div class="space-y-2">
+                ${completed.map(order => `
+                  <div class="bg-brand-surface dark:bg-brand-darkSurface border border-brand-border dark:border-brand-darkBorder rounded-xl p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+                    <div>
+                      <p class="font-bold text-brand-darkForest dark:text-white">Token #${order.id} • ${order.shopName}</p>
+                      <p class="text-[11px] text-brand-muted">${order.items.map(i => `${i.qty}x ${i.name}`).join(", ")} • Total: ₹${order.total.toFixed(2)}</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                      <span class="px-2 py-0.5 rounded-md bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 text-[10px] font-bold">Fulfilled</span>
+                      <button onclick="openReviewModal('${order.shopId}', '${order.id}')" class="px-3 py-1.5 rounded-xl bg-brand-cream dark:bg-brand-darkSurface2 border border-brand-border dark:border-brand-darkBorder font-bold text-xs flex items-center gap-1.5 hover:border-brand-darkForest transition">
+                        <i data-lucide="star" class="w-3.5 h-3.5 text-amber-500 fill-amber-500"></i>
+                        <span>Leave Review</span>
+                      </button>
+                    </div>
+                  </div>
+                `).slice(0, 4).join("")}
+              </div>
+            </div>
+          ` : ''}
+        </div>
+      `;
+    }
+
+    function setReviewFeedFilter(filter) {
+      studentReviewFilter = filter;
+      renderCurrentView();
+    }
+
+    function renderStudentReviewsView(container) {
+      let filteredReviews = reviews;
+      if (studentReviewFilter !== "all") {
+        filteredReviews = reviews.filter(r => r.shopId === studentReviewFilter);
+      }
+
+      const totalRev = reviews.length;
+      const overallAvg = totalRev > 0
+        ? (reviews.reduce((acc, r) => acc + (Number(r.rating) || 5), 0) / totalRev).toFixed(1)
+        : "4.8";
+      const repliedCount = reviews.filter(r => r.reply).length;
+      const responseRate = totalRev > 0 ? Math.round((repliedCount / totalRev) * 100) : 85;
+
+      container.innerHTML = `
+        <div class="space-y-6 max-w-4xl">
+          <!-- Header & Action -->
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-800 dark:text-amber-300 text-[10px] font-black uppercase mb-1">
+                <span>GCU Verified Feedback</span>
+              </div>
+              <h2 class="text-xl sm:text-2xl font-black text-brand-darkForest dark:text-white flex items-center gap-2">
+                <i data-lucide="star" class="w-6 h-6 text-amber-500 fill-amber-500"></i>
+                <span>Student Reviews & Ratings</span>
+              </h2>
+              <p class="text-xs text-brand-muted">Community experiences, food quality ratings, and vendor responses</p>
+            </div>
+            <button onclick="openReviewModal()" class="px-4 py-2.5 rounded-xl bg-brand-darkForest hover:bg-brand-darkForestHover text-white dark:bg-brand-mint dark:text-brand-darkForest font-bold text-xs transition flex items-center justify-center gap-2 shadow-xs">
+              <i data-lucide="edit-3" class="w-4 h-4"></i>
+              <span>Write a Review</span>
+            </button>
+          </div>
+
+          <!-- Rating Metrics & Campus Highlights -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div class="bg-brand-surface dark:bg-brand-darkSurface border border-brand-border dark:border-brand-darkBorder p-4 rounded-2xl flex items-center gap-4 shadow-xs">
+              <div class="w-12 h-12 rounded-2xl bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center font-black text-xl">
+                ★
+              </div>
+              <div>
+                <p class="text-[10px] text-brand-muted uppercase font-bold tracking-wider">Campus Avg Rating</p>
+                <p class="text-2xl font-black text-brand-darkForest dark:text-white font-mono">${overallAvg} <span class="text-xs text-brand-muted font-normal">/ 5.0</span></p>
+              </div>
+            </div>
+
+            <div class="bg-brand-surface dark:bg-brand-darkSurface border border-brand-border dark:border-brand-darkBorder p-4 rounded-2xl flex items-center gap-4 shadow-xs">
+              <div class="w-12 h-12 rounded-2xl bg-brand-mint/40 text-brand-mintDark flex items-center justify-center font-black">
+                <i data-lucide="message-square" class="w-5 h-5"></i>
+              </div>
+              <div>
+                <p class="text-[10px] text-brand-muted uppercase font-bold tracking-wider">Total Submissions</p>
+                <p class="text-2xl font-black text-brand-darkForest dark:text-white font-mono">${totalRev}</p>
+              </div>
+            </div>
+
+            <div class="bg-brand-surface dark:bg-brand-darkSurface border border-brand-border dark:border-brand-darkBorder p-4 rounded-2xl flex items-center gap-4 shadow-xs">
+              <div class="w-12 h-12 rounded-2xl bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 flex items-center justify-center font-black">
+                <i data-lucide="check-check" class="w-5 h-5"></i>
+              </div>
+              <div>
+                <p class="text-[10px] text-brand-muted uppercase font-bold tracking-wider">Vendor Response Rate</p>
+                <p class="text-2xl font-black text-brand-darkForest dark:text-white font-mono">${responseRate}%</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- 6 Outlets Star Rating Overview Grid -->
+          <div class="bg-brand-surface dark:bg-brand-darkSurface border border-brand-border dark:border-brand-darkBorder p-5 rounded-2xl space-y-3 shadow-xs">
+            <h3 class="font-extrabold text-sm text-brand-darkForest dark:text-white flex items-center gap-2">
+              <i data-lucide="store" class="w-4 h-4 text-brand-accent"></i>
+              <span>6 GCU Campus Stalls • Live Rating Scores</span>
+            </h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              ${SHOPS.map(s => {
+                const sRevs = reviews.filter(r => r.shopId === s.id);
+                const sAvg = sRevs.length > 0 
+                  ? (sRevs.reduce((acc, r) => acc + (Number(r.rating) || 5), 0) / sRevs.length).toFixed(1)
+                  : (s.rating || 4.8);
+                return `
+                  <div class="p-3 rounded-xl bg-brand-cream dark:bg-brand-darkSurface2 border border-brand-border dark:border-brand-darkBorder flex items-center justify-between text-xs">
+                    <div class="space-y-0.5">
+                      <p class="font-bold text-brand-darkForest dark:text-white truncate max-w-[150px]">${s.name}</p>
+                      <div class="flex items-center gap-1.5">
+                        <span class="text-amber-500 font-bold font-mono">★ ${sAvg}</span>
+                        <span class="text-brand-muted text-[10px]">(${sRevs.length} reviews)</span>
+                      </div>
+                    </div>
+                    <button onclick="openReviewModal('${s.id}')" class="px-2.5 py-1 rounded-lg bg-white dark:bg-brand-darkBg hover:bg-brand-darkForest hover:text-white border border-brand-border dark:border-brand-darkBorder text-[10px] font-bold transition">
+                      + Review
+                    </button>
+                  </div>
+                `;
+              }).join("")}
+            </div>
+          </div>
+
+          <!-- Filter Pills -->
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <h3 class="font-bold text-xs uppercase tracking-wider text-brand-muted">Recent Student Feedback Feed</h3>
+              <span class="text-xs text-brand-muted">${filteredReviews.length} reviews displayed</span>
+            </div>
+            <div class="flex items-center gap-1.5 overflow-x-auto custom-scroll pb-2">
+              <button onclick="setReviewFeedFilter('all')" class="px-3 py-1.5 rounded-xl text-xs font-bold transition shrink-0 ${studentReviewFilter === 'all' ? 'bg-brand-darkForest text-white dark:bg-brand-mint dark:text-brand-darkForest' : 'bg-brand-surface dark:bg-brand-darkSurface border border-brand-border dark:border-brand-darkBorder text-brand-darkForest dark:text-white'}">
+                All Outlets (${reviews.length})
+              </button>
+              ${SHOPS.map(s => {
+                const count = reviews.filter(r => r.shopId === s.id).length;
+                return `
+                  <button onclick="setReviewFeedFilter('${s.id}')" class="px-3 py-1.5 rounded-xl text-xs font-semibold transition shrink-0 ${studentReviewFilter === s.id ? 'bg-brand-darkForest text-white dark:bg-brand-mint dark:text-brand-darkForest' : 'bg-brand-surface dark:bg-brand-darkSurface border border-brand-border dark:border-brand-darkBorder text-brand-darkForest dark:text-white'}">
+                    ${s.name} (${count})
+                  </button>
+                `;
+              }).join("")}
+            </div>
+          </div>
+
+          <!-- Review Items List -->
+          <div class="space-y-3">
+            ${filteredReviews.length === 0 ? `
+              <div class="bg-brand-surface dark:bg-brand-darkSurface border border-brand-border dark:border-brand-darkBorder p-8 rounded-2xl text-center text-xs text-brand-muted space-y-2">
+                <i data-lucide="message-square-dashed" class="w-8 h-8 mx-auto text-brand-muted/40"></i>
+                <p class="font-bold text-brand-darkForest dark:text-white">No reviews found for this outlet yet.</p>
+                <p>Be the first student to review!</p>
+                <button onclick="openReviewModal('${studentReviewFilter !== 'all' ? studentReviewFilter : 'food-court'}')" class="mt-2 px-4 py-2 rounded-xl bg-brand-darkForest text-white font-bold text-xs">
+                  Write the First Review
+                </button>
+              </div>
+            ` : filteredReviews.map(r => `
+              <div class="bg-brand-surface dark:bg-brand-darkSurface border border-brand-border dark:border-brand-darkBorder p-4 rounded-2xl shadow-xs space-y-3">
+                <div class="flex items-start justify-between gap-3">
+                  <div class="flex items-center gap-2.5">
+                    <div class="w-9 h-9 rounded-xl bg-brand-cream dark:bg-brand-darkSurface2 flex items-center justify-center font-black text-brand-darkForest dark:text-white text-xs">
+                      ${r.student ? r.student.charAt(0).toUpperCase() : 'S'}
+                    </div>
+                    <div>
+                      <div class="flex items-center gap-2">
+                        <span class="font-bold text-xs text-brand-darkForest dark:text-white">${r.student}</span>
+                        <span class="text-[10px] text-brand-muted font-mono">(${r.email || 'student@gcu.edu.in'})</span>
+                      </div>
+                      <div class="flex items-center gap-1.5 mt-0.5">
+                        <span class="px-2 py-0.5 rounded-md bg-brand-cream dark:bg-brand-darkSurface2 border border-brand-border dark:border-brand-darkBorder text-[10px] font-semibold text-brand-darkForest dark:text-white">
+                          ${r.shopName}
+                        </span>
+                        <span class="text-[10px] text-brand-muted font-mono">• ${r.date}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="text-right">
+                    <span class="text-amber-500 font-bold text-sm tracking-tight">${'★'.repeat(r.rating || 5)}${'☆'.repeat(5 - (r.rating || 5))}</span>
+                    <span class="block text-[10px] text-brand-muted font-mono font-bold">${r.rating || 5}/5</span>
+                  </div>
+                </div>
+
+                <p class="text-xs text-brand-slate dark:text-slate-200 leading-relaxed bg-brand-cream/50 dark:bg-brand-darkSurface2/50 p-3 rounded-xl border border-brand-border/60 dark:border-brand-darkBorder/60">
+                  "${r.comment}"
+                </p>
+
+                ${r.reply ? `
+                  <div class="p-3 rounded-xl bg-brand-mint/20 dark:bg-brand-mint/10 border border-brand-mintDark/20 dark:border-brand-mint/20 space-y-1 text-xs">
+                    <div class="flex items-center gap-1.5 text-brand-mintDark dark:text-brand-mint font-bold text-[11px]">
+                      <i data-lucide="store" class="w-3.5 h-3.5"></i>
+                      <span>Official Vendor Response (${r.shopName}):</span>
+                    </div>
+                    <p class="text-brand-darkForest dark:text-slate-200 text-xs italic pl-5">
+                      "${r.reply}"
+                    </p>
+                  </div>
+                ` : ''}
+              </div>
+            `).join("")}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderNotificationsView(container) {
+      container.innerHTML = `
+        <div class="space-y-4 max-w-2xl">
+          <div>
+            <h2 class="text-xl font-extrabold text-brand-darkForest dark:text-white flex items-center gap-2">
+              <i data-lucide="bell" class="w-5 h-5 text-brand-accent"></i>
+              <span>Notifications & Alerts</span>
+            </h2>
+            <p class="text-xs text-brand-muted">Real-time alerts on queue drops, flash sales, and pickup readiness</p>
+          </div>
+          <div class="space-y-2.5">
+            <div class="p-3.5 rounded-2xl bg-brand-surface dark:bg-brand-darkSurface border border-brand-border dark:border-brand-darkBorder flex items-start gap-3">
+              <div class="w-8 h-8 rounded-xl bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 flex items-center justify-center shrink-0">
+                <i data-lucide="check-circle" class="w-4 h-4"></i>
+              </div>
+              <div class="text-xs">
+                <p class="font-bold text-brand-darkForest dark:text-white">Token #GCU-108 is ready for counter pickup!</p>
+                <p class="text-brand-muted mt-0.5">Please proceed to Main GCU Food Court counter for collection.</p>
+                <span class="text-[10px] text-brand-muted font-mono mt-1 block">5 mins ago</span>
+              </div>
+            </div>
+
+            <div class="p-3.5 rounded-2xl bg-brand-surface dark:bg-brand-darkSurface border border-brand-border dark:border-brand-darkBorder flex items-start gap-3">
+              <div class="w-8 h-8 rounded-xl bg-amber-500/15 text-amber-700 dark:text-amber-300 flex items-center justify-center shrink-0">
+                <i data-lucide="zap" class="w-4 h-4"></i>
+              </div>
+              <div class="text-xs">
+                <p class="font-bold text-brand-darkForest dark:text-white">Flash Queue Drop at GCU South Bites!</p>
+                <p class="text-brand-muted mt-0.5">Average wait dropped to 3 minutes. Perfect time to grab filter coffee.</p>
+                <span class="text-[10px] text-brand-muted font-mono mt-1 block">15 mins ago</span>
+              </div>
+            </div>
+
+            <div class="p-3.5 rounded-2xl bg-brand-surface dark:bg-brand-darkSurface border border-brand-border dark:border-brand-darkBorder flex items-start gap-3">
+              <div class="w-8 h-8 rounded-xl bg-blue-500/15 text-blue-700 dark:text-blue-300 flex items-center justify-center shrink-0">
+                <i data-lucide="tag" class="w-4 h-4"></i>
+              </div>
+              <div class="text-xs">
+                <p class="font-bold text-brand-darkForest dark:text-white">Promo Code GCU10 Active</p>
+                <p class="text-brand-muted mt-0.5">Use code GCU10 at checkout to claim your student welcome discount.</p>
+                <span class="text-[10px] text-brand-muted font-mono mt-1 block">1 hour ago</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderWalletView(container) {
+      container.innerHTML = `
+        <div class="space-y-6 max-w-3xl">
+          <div>
+            <h2 class="text-xl font-extrabold text-brand-darkForest dark:text-white flex items-center gap-2">
+              <i data-lucide="wallet" class="w-5 h-5 text-brand-accent"></i>
+              <span>GCU Student Digital Wallet</span>
+            </h2>
+            <p class="text-xs text-brand-muted">Contactless campus card & cashless UPI payments</p>
+          </div>
+
+          <div class="bg-gradient-to-r from-brand-darkForest to-brand-accent text-white p-6 rounded-3xl shadow-md space-y-4">
+            <div class="flex justify-between items-start">
+              <div>
+                <p class="text-xs text-brand-mint font-semibold uppercase tracking-wider">Available Balance</p>
+                <p class="text-3xl font-black font-mono mt-1">₹${walletBalance.toFixed(2)}</p>
+              </div>
+              <span class="px-2.5 py-1 rounded-full bg-brand-mint/20 text-brand-mint text-[10px] font-bold">GCU Verified</span>
+            </div>
+            <div class="flex items-center justify-between text-xs pt-2 border-t border-white/20">
+              <span>Card Holder: ${currentUser.name}</span>
+              <button onclick="openWalletModal()" class="px-4 py-1.5 rounded-xl bg-brand-mint text-brand-darkForest font-black text-xs hover:bg-white transition flex items-center gap-1">
+                <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                <span>Top Up Balance</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="space-y-3">
+            <h3 class="font-bold text-sm text-brand-darkForest dark:text-white">Recent Transactions</h3>
+            <div class="space-y-2 text-xs">
+              <div class="bg-brand-surface dark:bg-brand-darkSurface p-3 rounded-xl border border-brand-border dark:border-brand-darkBorder flex justify-between items-center">
+                <div>
+                  <p class="font-bold text-brand-darkForest dark:text-white">Main GCU Food Court (Token #GCU-108)</p>
+                  <p class="text-[10px] text-brand-muted">Today, 12:45 PM • Pre-order</p>
+                </div>
+                <span class="font-mono font-bold text-rose-600">-₹120.00</span>
+              </div>
+              <div class="bg-brand-surface dark:bg-brand-darkSurface p-3 rounded-xl border border-brand-border dark:border-brand-darkBorder flex justify-between items-center">
+                <div>
+                  <p class="font-bold text-brand-darkForest dark:text-white">UPI Wallet Auto Top-Up</p>
+                  <p class="text-[10px] text-brand-muted">Yesterday, 04:30 PM • GooglePay</p>
+                </div>
+                <span class="font-mono font-bold text-emerald-600">+₹500.00</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderSettingsView(container) {
+      container.innerHTML = `
+        <div class="space-y-5 max-w-xl">
+          <div>
+            <h2 class="text-xl font-extrabold text-brand-darkForest dark:text-white flex items-center gap-2">
+              <i data-lucide="settings" class="w-5 h-5 text-brand-accent"></i>
+              <span>Settings & Voice AI</span>
+            </h2>
+            <p class="text-xs text-brand-muted">Configure speech synthesizer, audio alerts, and theme preferences</p>
+          </div>
+
+          <div class="bg-brand-surface dark:bg-brand-darkSurface border border-brand-border dark:border-brand-darkBorder p-4 rounded-2xl space-y-4 text-xs">
+            <div class="flex items-center justify-between pb-3 border-b border-brand-border dark:border-brand-darkBorder">
+              <div>
+                <p class="font-bold text-brand-darkForest dark:text-white">AI Voice Speech Synthesis</p>
+                <p class="text-brand-muted text-[11px]">Speaks loud counter ready announcements</p>
+              </div>
+              <button onclick="toggleVoiceAssistant()" class="px-3 py-1.5 rounded-xl font-bold ${voiceEnabled ? 'bg-brand-mint text-brand-mintDark' : 'bg-brand-cream text-brand-muted'}">
+                ${voiceEnabled ? 'Enabled' : 'Muted'}
+              </button>
+            </div>
+
+            <div class="flex items-center justify-between pb-3 border-b border-brand-border dark:border-brand-darkBorder">
+              <div>
+                <p class="font-bold text-brand-darkForest dark:text-white">Audio Alert Chimes</p>
+                <p class="text-brand-muted text-[11px]">Play chime when token status changes</p>
+              </div>
+              <button onclick="toggleSoundAlerts()" class="px-3 py-1.5 rounded-xl font-bold ${soundEnabled ? 'bg-brand-mint text-brand-mintDark' : 'bg-brand-cream text-brand-muted'}">
+                ${soundEnabled ? 'Enabled' : 'Muted'}
+              </button>
+            </div>
+
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="font-bold text-brand-darkForest dark:text-white">Test Speech Capabilities</p>
+                <p class="text-brand-muted text-[11px]">Trigger sample audio announcement</p>
+              </div>
+              <button onclick="testVoiceAnnouncement()" class="px-3 py-1.5 rounded-xl bg-brand-darkForest text-white font-bold">
+                Play Sample
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    /* -------------------------------------------------------------
+       VENDOR / SHOP MANAGER VIEWS (9 FULLY WORKING VIEWS)
+       ------------------------------------------------------------- */
+    function renderVendorDashboard(container) {
+      const outlet = SHOPS.find(s => s.id === vendorOutletId) || SHOPS[5];
+      const stallOrders = orders.filter(o => o.shopId === vendorOutletId);
+      const totalRev = stallOrders.reduce((s, o) => s + o.total, 0) + 4200;
+
+      container.innerHTML = `
+        <div class="space-y-6">
+          <div class="bg-brand-surface dark:bg-brand-darkSurface border border-brand-border dark:border-brand-darkBorder rounded-2xl p-6 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-brand-mint text-brand-mintDark text-[10px] font-black uppercase mb-1">
+                <span>Vendor Kiosk Dashboard</span>
+              </div>
+              <h2 class="text-xl sm:text-2xl font-black text-brand-darkForest dark:text-white">${outlet.name}</h2>
+              <p class="text-xs text-brand-muted">Operational hours: ${outlet.hours} • Status: ${outlet.open ? '🟢 Open for Orders' : '🔴 Closed'}</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-semibold">Switch Outlet:</span>
+              <select onchange="changeVendorOutlet(this.value)" class="bg-brand-cream dark:bg-brand-darkSurface2 border border-brand-border dark:border-brand-darkBorder text-xs font-bold rounded-xl px-3 py-2 text-brand-darkForest dark:text-white focus:outline-none">
+                ${SHOPS.map(s => `<option value="${s.id}" ${s.id === vendorOutletId ? 'selected' : ''}>${s.name}</option>`).join("")}
+              </select>
+            </div>
+          </div>
+
+          <!-- KPI Cards -->
+          <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+            <div class="bg-brand-surface dark:bg-brand-darkSurface border border-brand-border dark:border-brand-darkBorder p-4 rounded-2xl">
+              <p class="text-xs text-brand-muted font-semibold">Orders Processed Today</p>
+              <p class="text-2xl font-black text-brand-darkForest dark:text-white mt-1">${stallOrders.length + 38}</p>
+              <p class="text-[10px] text-emerald-700 dark:text-emerald-400 mt-1">✓ +18% peak speedup</p>
+            </div>
+            <div class="bg-brand-surface dark:bg-brand-darkSurface border border-brand-border dark:border-brand-darkBorder p-4 rounded-2xl">
+              <p class="text-xs text-brand-muted font-semibold">Daily Sales Revenue</p>
+              <p class="text-2xl font-black text-brand-accent mt-1">₹${totalRev.toFixed(0)}</p>
+              <p class="text-[10px] text-brand-muted mt-1">Cashless GCU Pay & UPI</p>
+            </div>
+            <div class="bg-brand-surface dark:bg-brand-darkSurface border border-brand-border dark:border-brand-darkBorder p-4 rounded-2xl">
+              <p class="text-xs text-brand-muted font-semibold">Average Prep Time</p>
+              <p class="text-2xl font-black text-brand-darkForest dark:text-white mt-1">5.2 mins</p>
+              <p class="text-[10px] text-emerald-700 dark:text-emerald-400 mt-1">⚡ Fast queue dispatch</p>
+            </div>
+            <div class="bg-brand-surface dark:bg-brand-darkSurface border border-brand-border dark:border-brand-darkBorder p-4 rounded-2xl">
+              <p class="text-xs text-brand-muted font-semibold">Active Queue Tokens</p>
+              <p class="text-2xl font-black text-rose-600 dark:text-rose-400 mt-1">${stallOrders.filter(o=>o.status!=='completed').length}</p>
+              <p class="text-[10px] text-brand-muted mt-1">Live at counter</p>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderVendorOrders(container) {
+      let stallOrders = orders.filter(o => o.shopId === vendorOutletId);
+      if (staffFilter !== "all") stallOrders = stallOrders.filter(o => o.status === staffFilter);
+
+      container.innerHTML = `
+        <div class="space-y-4">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <h2 class="text-xl font-extrabold text-brand-darkForest dark:text-white">Active Orders & Tokens Stream</h2>
+              <p class="text-xs text-brand-muted">Click "Mark Ready" to trigger the GCU AI Voice Announcement</p>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <button onclick="setStaffFilter('all')" class="px-2.5 py-1 rounded-lg text-xs font-bold ${staffFilter==='all'?'bg-brand-darkForest text-white dark:bg-brand-mint dark:text-brand-darkForest':'bg-brand-surface dark:bg-brand-darkSurface'}">All</button>
+              <button onclick="setStaffFilter('received')" class="px-2.5 py-1 rounded-lg text-xs font-bold ${staffFilter==='received'?'bg-brand-darkForest text-white dark:bg-brand-mint dark:text-brand-darkForest':'bg-brand-surface dark:bg-brand-darkSurface'}">Received</button>
+              <button onclick="setStaffFilter('preparing')" class="px-2.5 py-1 rounded-lg text-xs font-bold ${staffFilter==='preparing'?'bg-brand-darkForest text-white dark:bg-brand-mint dark:text-brand-darkForest':'bg-brand-surface dark:bg-brand-darkSurface'}">In Progress</button>
+              <button onclick="setStaffFilter('ready')" class="px-2.5 py-1 rounded-lg text-xs font-bold ${staffFilter==='ready'?'bg-brand-darkForest text-white dark:bg-brand-mint dark:text-brand-darkForest':'bg-brand-surface dark:bg-brand-darkSurface'}">Ready</button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            ${stallOrders.map(order => `
+              <div class="bg-brand-surface dark:bg-brand-darkSurface border border-brand-border dark:border-brand-darkBorder rounded-2xl p-4 flex flex-col justify-between space-y-3 shadow-xs">
+                <div class="space-y-2">
+                  <div class="flex justify-between items-center pb-2 border-b border-brand-border dark:border-brand-darkBorder">
+                    <div>
+                      <span class="text-[10px] text-brand-muted">Token</span>
+                      <p class="text-xl font-black text-brand-darkForest dark:text-white font-mono">#${order.id}</p>
+                    </div>
+                    <span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase ${order.status==='ready'?'bg-brand-mint text-brand-mintDark':'bg-amber-500/15 text-amber-800 dark:text-amber-200'}">${order.status}</span>
+                  </div>
+                  <div class="text-xs">
+                    <p class="font-bold text-brand-darkForest dark:text-white">${order.student}</p>
+                    <p class="text-[10px] text-brand-muted font-mono">${order.email}</p>
+                  </div>
+                  <div class="text-xs space-y-0.5">
+                    ${order.items.map(i => `<div class="flex justify-between"><span>${i.qty}x ${i.name}</span><span class="font-mono">₹${i.price * i.qty}</span></div>`).join("")}
+                  </div>
+                </div>
+
+                <div class="pt-2 border-t border-brand-border dark:border-brand-darkBorder space-y-1.5">
+                  <div class="grid grid-cols-2 gap-1.5">
+                    <button onclick="vendorUpdateStatus('${order.id}', 'preparing')" class="py-1.5 rounded-xl bg-amber-500/20 text-amber-800 dark:text-amber-200 font-bold text-xs hover:bg-amber-500/30">
+                      In Progress
+                    </button>
+                    <button onclick="vendorMarkReady('${order.id}')" class="py-1.5 rounded-xl bg-brand-mint text-brand-mintDark font-bold text-xs hover:bg-brand-mintSoft flex items-center justify-center gap-1">
+                      <i data-lucide="bell" class="w-3 h-3"></i>
+                      <span>Ready (Speak)</span>
+                    </button>
+                  </div>
+                  <button onclick="vendorCompleteOrder('${order.id}')" class="w-full py-1.5 rounded-xl bg-brand-cream dark:bg-brand-darkSurface2 border border-brand-border dark:border-brand-darkBorder font-semibold text-xs text-brand-muted hover:text-brand-darkForest dark:hover:text-white">
+                    Fulfill & Generate Invoice
+                  </button>
+                </div>
+              </div>
+            `).join("")}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderVendorMenu(container) {
+      const items = catalog.filter(i => i.shopId === vendorOutletId);
+
+      container.innerHTML = `
+        <div class="space-y-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="text-xl font-extrabold text-brand-darkForest dark:text-white">Menu & Inventory Management</h2>
+              <p class="text-xs text-brand-muted">Manage stock availability and add new catalog items</p>
+            </div>
+            <button onclick="openAddItemModal()" class="px-4 py-2 rounded-xl bg-brand-darkForest hover:bg-brand-darkForestHover text-white font-bold text-xs flex items-center gap-1.5 transition">
+              <i data-lucide="plus" class="w-4 h-4"></i>
+              <span>Add New Item</span>
+            </button>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            ${items.map(item => `
+              <div class="bg-brand-surface dark:bg-brand-darkSurface border border-brand-border dark:border-brand-darkBorder rounded-2xl p-4 flex flex-col justify-between space-y-3">
+                <div class="space-y-1">
+                  <div class="flex justify-between items-center">
+                    <span class="text-xs font-black font-mono">₹${item.price.toFixed(2)}</span>
+                    <button onclick="toggleStockAvailability('${item.id}')" class="px-2 py-0.5 rounded-full text-[10px] font-bold ${item.inStock ? 'bg-brand-mint text-brand-mintDark' : 'bg-rose-500/15 text-rose-700 dark:text-rose-300'}">
+                      ${item.inStock ? 'In Stock' : 'Out of Stock'}
+                    </button>
+                  </div>
+                  <h4 class="font-bold text-sm text-brand-darkForest dark:text-white">${item.name}</h4>
+                  <p class="text-xs text-brand-muted">${item.desc}</p>
+                </div>
+                <div class="pt-2 border-t border-brand-border dark:border-brand-darkBorder flex justify-between items-center text-xs">
+                  <span class="text-brand-muted">${item.tag || 'Standard'}</span>
+                  <button onclick="deleteCatalogItem('${item.id}')" class="text-rose-600 hover:underline flex items-center gap-1">
+                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                    <span>Delete</span>
+                  </button>
+                </div>
+              </div>
+            `).join("")}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderVendorPayments(container) {
+      container.innerHTML = `
+        <div class="space-y-5 max-w-3xl">
+          <div>
+            <h2 class="text-xl font-extrabold text-brand-darkForest dark:text-white">Payments & Digital Invoices</h2>
+            <p class="text-xs text-brand-muted">Daily settlement balance and tax invoice receipts</p>
+          </div>
+
+          <div class="bg-brand-surface dark:bg-brand-darkSurface border border-brand-border dark:border-brand-darkBorder rounded-2xl p-5 space-y-4">
+            <div class="flex justify-between items-center">
+              <div>
+                <p class="text-xs text-brand-muted uppercase font-bold">Unsettled Payout Balance</p>
+                <p class="text-2xl font-black font-mono mt-0.5">₹4,250.00</p>
+              </div>
+              <button onclick="showToast('Payout transfer initiated to GCU Vendor Bank Account', 'success')" class="px-4 py-2 rounded-xl bg-brand-darkForest text-white font-bold text-xs">
+                Request Instant Settlement
+              </button>
+            </div>
+            <div class="text-[11px] text-brand-muted border-t border-brand-border dark:border-brand-darkBorder pt-2">
+              Next scheduled campus settlement: Midnight 12:00 AM (NEFT/IMPS)
+            </div>
+          </div>
+
+          <div class="space-y-2">
+            <h3 class="font-bold text-sm text-brand-darkForest dark:text-white">Recent Fulfilled Orders (Invoices)</h3>
+            <div class="space-y-2 text-xs">
+              ${orders.map(o => `
+                <div class="bg-brand-surface dark:bg-brand-darkSurface p-3 rounded-xl border border-brand-border dark:border-brand-darkBorder flex items-center justify-between">
+                  <div>
+                    <p class="font-bold text-brand-darkForest dark:text-white">Token #${o.id} • ${o.student}</p>
+                    <p class="text-[10px] text-brand-muted">${o.items.map(i=>i.name).join(", ")}</p>
+                  </div>
+                  <button onclick="viewDigitalInvoice('${o.id}')" class="px-3 py-1.5 rounded-lg bg-brand-cream dark:bg-brand-darkSurface2 border border-brand-border dark:border-brand-darkBorder font-semibold text-xs flex items-center gap-1">
+                    <i data-lucide="receipt" class="w-3.5 h-3.5"></i>
+                    <span>View Invoice</span>
+                  </button>
+                </div>
+              `).slice(0, 4).join("")}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderVendorOffers(container) {
+      container.innerHTML = `
+        <div class="space-y-5 max-w-3xl">
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="text-xl font-extrabold text-brand-darkForest dark:text-white">Offers & Discounts</h2>
+              <p class="text-xs text-brand-muted">Create custom promo codes to incentivize off-peak dining</p>
+            </div>
+          </div>
+
+          <!-- Create Promo Form -->
+          <div class="bg-brand-surface dark:bg-brand-darkSurface border border-brand-border dark:border-brand-darkBorder p-4 rounded-2xl space-y-3">
+            <h3 class="font-bold text-xs uppercase tracking-wider text-brand-darkForest dark:text-white">Create New Promo Code</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
+              <input type="text" id="newPromoCode" placeholder="Code (e.g. FLASH15)" class="px-3 py-2 rounded-xl bg-white dark:bg-brand-darkBg border border-brand-border dark:border-brand-darkBorder font-mono uppercase" />
+              <input type="number" id="newPromoDiscount" placeholder="Discount % (e.g. 15)" class="px-3 py-2 rounded-xl bg-white dark:bg-brand-darkBg border border-brand-border dark:border-brand-darkBorder font-mono" />
+              <button onclick="handleCreatePromo()" class="py-2 rounded-xl bg-brand-darkForest text-white font-bold">Activate Promo</button>
+            </div>
+          </div>
+
+          <!-- Active Promos Table -->
+          <div class="space-y-2">
+            ${promos.map((p, idx) => `
+              <div class="bg-brand-surface dark:bg-brand-darkSurface border border-brand-border dark:border-brand-darkBorder p-3 rounded-xl flex items-center justify-between text-xs">
+                <div>
+                  <span class="font-mono font-black text-brand-darkForest dark:text-white">${p.code}</span>
+                  <span class="ml-2 font-bold text-brand-accent">${p.discount}% OFF</span>
+                  <p class="text-[10px] text-brand-muted">${p.title || 'Campus Flash Deal'}</p>
+                </div>
+                <button onclick="togglePromoActive(${idx})" class="px-2.5 py-1 rounded-lg text-xs font-bold ${p.active ? 'bg-brand-mint text-brand-mintDark' : 'bg-brand-cream text-brand-muted'}">
+                  ${p.active ? 'Active' : 'Disabled'}
+                </button>
+              </div>
+            `).join("")}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderVendorReviews(container) {
+      const outlet = SHOPS.find(s => s.id === vendorOutletId) || SHOPS[5];
+      const stallReviews = reviews.filter(r => r.shopId === vendorOutletId);
+      const avg = stallReviews.length > 0
+        ? (stallReviews.reduce((s, r) => s + (Number(r.rating) || 5), 0) / stallReviews.length).toFixed(1)
+        : "4.8";
+      const positiveCount = stallReviews.filter(r => (Number(r.rating) || 5) >= 4).length;
+      const positivePercent = stallReviews.length > 0 ? Math.round((positiveCount / stallReviews.length) * 100) : 95;
+
+      container.innerHTML = `
+        <div class="space-y-5 max-w-3xl">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-brand-mint text-brand-mintDark text-[10px] font-black uppercase mb-1">
+                <span>Vendor Feedback Console</span>
+              </div>
+              <h2 class="text-xl font-extrabold text-brand-darkForest dark:text-white">Reviews & Ratings • ${outlet.name}</h2>
+              <p class="text-xs text-brand-muted">Student satisfaction scores and feedback responses for this outlet</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-semibold">Switch Outlet:</span>
+              <select onchange="changeVendorOutlet(this.value)" class="bg-brand-cream dark:bg-brand-darkSurface2 border border-brand-border dark:border-brand-darkBorder text-xs font-bold rounded-xl px-3 py-2 text-brand-darkForest dark:text-white focus:outline-none">
+                ${SHOPS.map(s => `<option value="${s.id}" ${s.id === vendorOutletId ? 'selected' : ''}>${s.name}</option>`).join("")}
+              </select>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div class="bg-brand-surface dark:bg-brand-darkSurface border border-brand-border dark:border-brand-darkBorder p-4 rounded-2xl text-center shadow-xs">
+              <p class="text-3xl font-black text-brand-darkForest dark:text-white font-mono">${avg}</p>
+              <p class="text-amber-500 text-sm mt-1">★ ★ ★ ★ ★</p>
+              <p class="text-[10px] text-brand-muted mt-1">Based on ${stallReviews.length} student reviews</p>
+            </div>
+            <div class="col-span-2 bg-brand-surface dark:bg-brand-darkSurface border border-brand-border dark:border-brand-darkBorder p-4 rounded-2xl flex flex-col justify-center text-xs space-y-1 shadow-xs">
+              <p class="font-bold text-brand-darkForest dark:text-white">${positivePercent}% Positive Feedback</p>
+              <p class="text-brand-muted">Students praise fast counter handover times, pre-order accuracy, and packaging.</p>
+            </div>
+          </div>
+
+          <div class="space-y-3">
+            <div class="flex items-center justify-between">
+              <h3 class="font-bold text-xs uppercase tracking-wider text-brand-darkForest dark:text-white">Student Reviews (${stallReviews.length})</h3>
+            </div>
+            ${stallReviews.length === 0 ? `
+              <div class="p-6 rounded-2xl bg-brand-surface dark:bg-brand-darkSurface border border-brand-border dark:border-brand-darkBorder text-center text-xs text-brand-muted">
+                No student reviews for this outlet yet.
+              </div>
+            ` : stallReviews.map(r => `
+              <div class="bg-brand-surface dark:bg-brand-darkSurface border border-brand-border dark:border-brand-darkBorder p-4 rounded-2xl space-y-2.5 text-xs shadow-xs">
+                <div class="flex justify-between items-center">
+                  <div class="flex items-center gap-2">
+                    <span class="font-bold text-brand-darkForest dark:text-white">${r.student}</span>
+                    <span class="text-[10px] text-brand-muted font-mono">(${r.email || 'student@gcu.edu.in'})</span>
+                    <span class="text-amber-500 font-bold">${'★'.repeat(r.rating || 5)}</span>
+                  </div>
+                  <span class="text-[10px] text-brand-muted font-mono">${r.date}</span>
+                </div>
+                <p class="text-brand-slate dark:text-slate-300 bg-brand-cream/40 dark:bg-brand-darkSurface2/40 p-2.5 rounded-xl border border-brand-border/40">"${r.comment}"</p>
+                ${r.reply ? `
+                  <div class="bg-brand-mint/15 dark:bg-brand-mint/10 p-2.5 rounded-xl border border-brand-mintDark/20 dark:border-brand-mint/20 text-[11px]">
+                    <strong class="text-brand-mintDark dark:text-brand-mint">Your Published Vendor Reply:</strong>
+                    <p class="mt-0.5 italic text-brand-darkForest dark:text-slate-200">"${r.reply}"</p>
+                  </div>
+                ` : `
+                  <div class="flex gap-2 pt-1">
+                    <input type="text" id="replyInput-${r.id}" placeholder="Type vendor response to student..." class="w-full px-3 py-1.5 text-xs rounded-xl bg-white dark:bg-brand-darkBg border border-brand-border dark:border-brand-darkBorder focus:outline-none" />
+                    <button onclick="handleReplyReview(${r.id})" class="px-3.5 py-1.5 rounded-xl bg-brand-darkForest text-white font-bold text-xs shrink-0 hover:bg-brand-darkForestHover transition">
+                      Post Reply
+                    </button>
+                  </div>
+                `}
+              </div>
+            `).join("")}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderVendorHours(container) {
+      const outlet = SHOPS.find(s => s.id === vendorOutletId) || SHOPS[5];
+
+      container.innerHTML = `
+        <div class="space-y-5 max-w-xl">
+          <div>
+            <h2 class="text-xl font-extrabold text-brand-darkForest dark:text-white">Working Hours & Shop Status</h2>
+            <p class="text-xs text-brand-muted">Toggle stall availability to temporarily halt incoming student pre-orders</p>
+          </div>
+
+          <div class="bg-brand-surface dark:bg-brand-darkSurface border border-brand-border dark:border-brand-darkBorder p-5 rounded-2xl space-y-4 text-xs">
+            <div class="flex items-center justify-between pb-3 border-b border-brand-border dark:border-brand-darkBorder">
+              <div>
+                <p class="font-bold text-sm text-brand-darkForest dark:text-white">Master Stall Status</p>
+                <p class="text-brand-muted text-[11px]">Toggle open/closed for pre-ordering</p>
+              </div>
+              <button onclick="toggleShopOpenStatus()" class="px-4 py-2 rounded-xl font-bold ${outlet.open ? 'bg-brand-mint text-brand-mintDark' : 'bg-rose-500/15 text-rose-700 dark:text-rose-300'}">
+                ${outlet.open ? '🟢 Open for Orders' : '🔴 Closed / Busy'}
+              </button>
+            </div>
+
+            <div class="space-y-2">
+              <label class="font-bold text-brand-darkForest dark:text-white block">Stall Operating Timings</label>
+              <input type="text" id="stallTimingsInput" value="${outlet.hours}" class="w-full px-3 py-2 rounded-xl bg-white dark:bg-brand-darkBg border border-brand-border dark:border-brand-darkBorder font-mono" />
+              <button onclick="saveOperatingHours()" class="w-full py-2 rounded-xl bg-brand-darkForest text-white font-bold">Save Operating Hours</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderVendorNotifications(container) {
+      container.innerHTML = `
+        <div class="space-y-4 max-w-2xl">
+          <div>
+            <h2 class="text-xl font-extrabold text-brand-darkForest dark:text-white">Vendor Notifications</h2>
+            <p class="text-xs text-brand-muted">Incoming order pings, inventory alerts, and admin updates</p>
+          </div>
+          <div class="space-y-2.5 text-xs">
+            <div class="p-3.5 rounded-2xl bg-brand-surface dark:bg-brand-darkSurface border border-brand-border dark:border-brand-darkBorder flex items-start gap-3">
+              <i data-lucide="package-plus" class="w-4 h-4 text-brand-accent shrink-0 mt-0.5"></i>
+              <div>
+                <p class="font-bold text-brand-darkForest dark:text-white">New Pre-Order: Token #GCU-113</p>
+                <p class="text-brand-muted">GCU Official Lab Record Manual ordered by Mohit Deshmukh.</p>
+                <span class="text-[10px] text-brand-muted font-mono">2 mins ago</span>
+              </div>
+            </div>
+            <div class="p-3.5 rounded-2xl bg-brand-surface dark:bg-brand-darkSurface border border-brand-border dark:border-brand-darkBorder flex items-start gap-3">
+              <i data-lucide="alert-triangle" class="w-4 h-4 text-amber-500 shrink-0 mt-0.5"></i>
+              <div>
+                <p class="font-bold text-brand-darkForest dark:text-white">Low Inventory Notice</p>
+                <p class="text-brand-muted">A4 75GSM Bond paper reams running below 15 packs in store.</p>
+                <span class="text-[10px] text-brand-muted font-mono">1 hour ago</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderVendorSettings(container) {
+      container.innerHTML = `
+        <div class="space-y-5 max-w-xl">
+          <div>
+            <h2 class="text-xl font-extrabold text-brand-darkForest dark:text-white">Vendor Settings & Voice AI</h2>
+            <p class="text-xs text-brand-muted">Test counter speech synthesizer and sound chime</p>
+          </div>
+
+          <div class="bg-brand-surface dark:bg-brand-darkSurface border border-brand-border dark:border-brand-darkBorder p-5 rounded-2xl space-y-4 text-xs">
+            <div class="flex items-center justify-between pb-3 border-b border-brand-border dark:border-brand-darkBorder">
+              <div>
+                <p class="font-bold text-brand-darkForest dark:text-white">Test Counter Voice Announcement</p>
+                <p class="text-brand-muted text-[11px]">Triggers native SpeechSynthesis</p>
+              </div>
+              <button onclick="testVoiceAnnouncement()" class="px-3.5 py-2 rounded-xl bg-brand-darkForest text-white font-bold flex items-center gap-1.5">
+                <i data-lucide="volume-2" class="w-4 h-4"></i>
+                <span>Test Announcement</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // 5. Vendor Operations
+    function changeVendorOutlet(outletId) {
+      vendorOutletId = outletId;
+      localStorage.setItem(K_VENDOR_OUTLET, outletId);
+      renderCurrentView();
+      showToast(`Switched vendor stall to ${SHOPS.find(s=>s.id===outletId).name}`, "info");
+    }
+
+    function setStaffFilter(f) {
+      staffFilter = f;
+      renderCurrentView();
+    }
+
+    function vendorUpdateStatus(tokenId, newStatus) {
+      const order = orders.find(o => o.id === tokenId);
+      if (order) {
+        order.status = newStatus;
+        playAudioChime();
+        saveOrders();
+        renderCurrentView();
+        showToast(`Token #${tokenId} set to In Progress`, "info");
+      }
+    }
+
+    function vendorMarkReady(tokenId) {
+      const order = orders.find(o => o.id === tokenId);
+      if (order) {
+        order.status = "ready";
+        saveOrders();
+        renderCurrentView();
+        triggerVoiceAnnouncement(order.id, order.shopName);
+        showToast(`Token #${tokenId} is READY! Audio announcement played.`, "success");
+      }
+    }
+
+    function vendorCompleteOrder(tokenId) {
+      const order = orders.find(o => o.id === tokenId);
+      if (order) {
+        order.status = "completed";
+        saveOrders();
+        renderCurrentView();
+        showToast(`Token #${tokenId} fulfilled. Digital invoice ready.`, "success");
+        viewDigitalInvoice(tokenId);
+      }
+    }
+
+    function openAddItemModal() { document.getElementById("addItemModal").classList.remove("hidden"); if (window.lucide) lucide.createIcons(); }
+    function closeAddItemModal() { document.getElementById("addItemModal").classList.add("hidden"); }
+
+    function confirmAddNewItem() {
+      const name = document.getElementById("newItemName").value.trim();
+      const price = parseFloat(document.getElementById("newItemPrice").value);
+      const tag = document.getElementById("newItemTag").value.trim() || "Special";
+      const desc = document.getElementById("newItemDesc").value.trim() || "Prepared fresh upon order";
+
+      if (!name || isNaN(price)) {
+        showToast("Please provide valid item title and price", "error");
+        return;
+      }
+
+      catalog.push({
+        id: "item-" + Date.now(),
+        shopId: vendorOutletId,
+        name: name,
+        price: price,
+        desc: desc,
+        tag: tag,
+        inStock: true
+      });
+
+      localStorage.setItem(K_CATALOG, JSON.stringify(catalog));
+      closeAddItemModal();
+      renderCurrentView();
+      showToast(`Added ${name} to your live menu!`, "success");
+    }
+
+    function toggleStockAvailability(itemId) {
+      const item = catalog.find(i => i.id === itemId);
+      if (item) {
+        item.inStock = !item.inStock;
+        localStorage.setItem(K_CATALOG, JSON.stringify(catalog));
+        renderCurrentView();
+        showToast(`${item.name} is now ${item.inStock ? 'In Stock' : 'Out of Stock'}`, "info");
+      }
+    }
+
+    function deleteCatalogItem(itemId) {
+      const idx = catalog.findIndex(i => i.id === itemId);
+      if (idx !== -1) {
+        const name = catalog[idx].name;
+        catalog.splice(idx, 1);
+        localStorage.setItem(K_CATALOG, JSON.stringify(catalog));
+        renderCurrentView();
+        showToast(`Removed ${name} from catalog`, "info");
+      }
+    }
+
+    function viewDigitalInvoice(tokenId) {
+      const order = orders.find(o => o.id === tokenId);
+      if (!order) return;
+
+      const modal = document.getElementById("invoiceModal");
+      const content = document.getElementById("invoiceContent");
+      content.innerHTML = `
+        <div class="text-center pb-3 border-b border-brand-border dark:border-brand-darkBorder">
+          <p class="font-extrabold text-base text-brand-darkForest dark:text-white">Garden City University</p>
+          <p class="text-[11px] text-brand-muted">Official Campus Marketplace Digital Tax Invoice</p>
+          <p class="font-mono text-xs font-bold mt-1">Receipt #${order.id}</p>
+        </div>
+        <div class="text-xs space-y-1">
+          <p><strong>Stall:</strong> ${order.shopName}</p>
+          <p><strong>Student:</strong> ${order.student} (${order.email})</p>
+          <p><strong>Time:</strong> ${order.time}</p>
+        </div>
+        <div class="text-xs border-y border-brand-border dark:border-brand-darkBorder py-2 space-y-1">
+          ${order.items.map(i => `<div class="flex justify-between"><span>${i.qty}x ${i.name}</span><span class="font-mono">₹${(i.price*i.qty).toFixed(2)}</span></div>`).join("")}
+        </div>
+        <div class="flex justify-between font-mono font-bold text-sm">
+          <span>Total Paid (GCU Pay)</span>
+          <span>₹${order.total.toFixed(2)}</span>
+        </div>
+        <p class="text-center text-[10px] text-brand-muted">✓ Digitally Authorized & Verified</p>
+      `;
+
+      modal.classList.remove("hidden");
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function closeInvoiceModal() { document.getElementById("invoiceModal").classList.add("hidden"); }
+
+    function handleCreatePromo() {
+      const code = document.getElementById("newPromoCode").value.trim().toUpperCase();
+      const disc = parseFloat(document.getElementById("newPromoDiscount").value);
+      if (!code || isNaN(disc)) return;
+      promos.unshift({ code: code, discount: disc, title: `${disc}% Promo Code`, active: true });
+      localStorage.setItem(K_PROMOS, JSON.stringify(promos));
+      renderCurrentView();
+      showToast(`Promo ${code} activated!`, "success");
+    }
+
+    function togglePromoActive(idx) {
+      promos[idx].active = !promos[idx].active;
+      localStorage.setItem(K_PROMOS, JSON.stringify(promos));
+      renderCurrentView();
+    }
+
+    function handleReplyReview(revId) {
+      const input = document.getElementById(`replyInput-${revId}`);
+      if (!input || !input.value.trim()) return;
+      const r = reviews.find(x => x.id === revId);
+      if (r) {
+        r.reply = input.value.trim();
+        localStorage.setItem(K_REVIEWS, JSON.stringify(reviews));
+        renderCurrentView();
+        showToast("Reply published to student review", "success");
+      }
+    }
+
+    function toggleShopOpenStatus() {
+      const outlet = SHOPS.find(s => s.id === vendorOutletId);
+      if (outlet) {
+        outlet.open = !outlet.open;
+        renderCurrentView();
+        showToast(`Stall status set to ${outlet.open ? 'Open' : 'Closed'}`, "info");
+      }
+    }
+
+    function saveOperatingHours() {
+      const val = document.getElementById("stallTimingsInput").value.trim();
+      const outlet = SHOPS.find(s => s.id === vendorOutletId);
+      if (outlet && val) {
+        outlet.hours = val;
+        showToast("Operating hours saved", "success");
+      }
+    }
+
+    // 6. Student Actions & Cart
+    function setCatalogFilter(shopId) {
+      catalogFilterShop = shopId;
+      renderCurrentView();
+    }
+
+    function handleSearchCatalog(val) {
+      catalogSearchQuery = val.toLowerCase().trim();
+      renderCurrentView();
+    }
+
+    function addToCart(itemId) {
+      const item = catalog.find(i => i.id === itemId);
+      if (!item) return;
+      const inCart = cart.find(c => c.id === itemId);
+      if (inCart) inCart.qty += 1;
+      else cart.push({ id: item.id, name: item.name, price: item.price, shopId: item.shopId, qty: 1 });
+      saveCart();
+      renderCurrentView();
+      showToast(`Added ${item.name} to cart`, "success");
+    }
+
+    function updateCartItem(itemId, delta) {
+      const idx = cart.findIndex(c => c.id === itemId);
+      if (idx === -1) return;
+      cart[idx].qty += delta;
+      if (cart[idx].qty <= 0) cart.splice(idx, 1);
+      saveCart();
+      renderCurrentView();
+    }
+
+    function saveCart() {
+      localStorage.setItem(K_CART, JSON.stringify(cart));
+      renderCartDrawerUI();
+    }
+
+    function toggleCartDrawer(open) {
+      const drawer = document.getElementById("cartDrawer");
+      if (!drawer) return;
+      if (open) {
+        drawer.classList.remove("hidden");
+        setTimeout(() => drawer.classList.remove("opacity-0"), 10);
+      } else {
+        drawer.classList.add("opacity-0");
+        setTimeout(() => drawer.classList.add("hidden"), 250);
+      }
+      renderCartDrawerUI();
+    }
+
+    function renderCartDrawerUI() {
+      const countBadge = document.getElementById("cartCountBadge");
+      const totalCount = cart.reduce((s, i) => s + i.qty, 0);
+      if (countBadge) countBadge.textContent = totalCount;
+
+      const container = document.getElementById("cartItemsContainer");
+      if (!container) return;
+
+      if (cart.length === 0) {
+        container.innerHTML = `<div class="py-12 text-center text-xs text-brand-muted">Your cart is empty.</div>`;
+        document.getElementById("cartSubtotal").textContent = "₹0.00";
+        document.getElementById("cartTotal").textContent = "₹0.00";
+        document.getElementById("peakRewardLine").classList.add("hidden");
+        return;
+      }
+
+      let sub = 0;
+      container.innerHTML = cart.map(item => {
+        const itemTot = item.price * item.qty;
+        sub += itemTot;
+        return `
+          <div class="flex items-center justify-between text-xs bg-brand-surface dark:bg-brand-darkSurface2 p-2.5 rounded-xl border border-brand-border dark:border-brand-darkBorder">
+            <div>
+              <p class="font-bold text-brand-darkForest dark:text-white">${item.name}</p>
+              <p class="text-[10px] text-brand-muted font-mono">₹${item.price} each</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <div class="flex items-center gap-1 bg-brand-cream dark:bg-brand-darkSurface px-1.5 py-0.5 rounded-lg border border-brand-border dark:border-brand-darkBorder font-mono font-bold">
+                <button onclick="updateCartItem('${item.id}', -1)">-</button>
+                <span class="px-1.5">${item.qty}</span>
+                <button onclick="updateCartItem('${item.id}', 1)">+</button>
+              </div>
+              <span class="font-mono font-bold w-12 text-right">₹${itemTot}</span>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      const discount = peakRewardApplied ? sub * 0.10 : 0;
+      const total = sub - discount;
+      document.getElementById("cartSubtotal").textContent = `₹${sub.toFixed(2)}`;
+      document.getElementById("cartTotal").textContent = `₹${total.toFixed(2)}`;
+
+      const rewardLine = document.getElementById("peakRewardLine");
+      if (peakRewardApplied) {
+        rewardLine.classList.remove("hidden");
+        document.getElementById("cartRewardDiscount").textContent = `-₹${discount.toFixed(2)}`;
+      } else {
+        rewardLine.classList.add("hidden");
+      }
+    }
+
+    function handlePlaceOrder() {
+      if (cart.length === 0) return;
+      if (!currentUser) { openLoginModal(); return; }
+
+      const grouped = {};
+      cart.forEach(i => {
+        if (!grouped[i.shopId]) grouped[i.shopId] = [];
+        grouped[i.shopId].push(i);
+      });
+
+      for (const [shopId, items] of Object.entries(grouped)) {
+        const shop = SHOPS.find(s => s.id === shopId);
+        const tokenId = "GCU-" + (100 + orders.length + Math.floor(Math.random() * 20));
+        const sub = items.reduce((s, i) => s + (i.price * i.qty), 0);
+        orders.unshift({
+          id: tokenId,
+          shopId: shopId,
+          shopName: shop ? shop.name : "GCU Outlet",
+          student: currentUser.name,
+          email: currentUser.email || "student@gcu.edu.in",
+          items: items.map(i => ({ name: i.name, qty: i.qty, price: i.price })),
+          total: peakRewardApplied ? sub * 0.9 : sub,
+          status: "received",
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        });
+      }
+
+      playAudioChime();
+      cart = [];
+      peakRewardApplied = false;
+      saveCart();
+      saveOrders();
+      toggleCartDrawer(false);
+      navigateToTab("tokens");
+      showToast("Pre-order placed! Active Token generated.", "success");
+    }
+
+    function saveOrders() {
+      localStorage.setItem(K_ORDERS, JSON.stringify(orders));
+    }
+
+    function acceptNudge(shopId) {
+      catalogFilterShop = shopId;
+      navigateToTab("shops");
+      showToast(`Nudge applied: Showing ${SHOPS.find(s=>s.id===shopId).name}`, "success");
+    }
+
+    function applyPeakShiftReward() {
+      peakRewardApplied = true;
+      toggleCartDrawer(true);
+      showToast("🎁 Peak-Shift Reward Applied: 10% Cashback on checkout!", "success");
+    }
+
+    // Token Action Handlers (100% Interactive Modals, Zero window.confirm/prompt)
+    function passTokenToFriend(tokenId) {
+      const order = orders.find(o => o.id === tokenId);
+      if (!order) return;
+      targetTokenToPass = tokenId;
+      const modal = document.getElementById("passTokenModal");
+      if (!modal) return;
+      document.getElementById("passModalTokenId").textContent = `#${order.id}`;
+      document.getElementById("passModalShopName").textContent = order.shopName;
+      const input = document.getElementById("passFriendEmailInput");
+      if (input) input.value = "";
+      modal.classList.remove("hidden");
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function closePassTokenModal() {
+      const modal = document.getElementById("passTokenModal");
+      if (modal) modal.classList.add("hidden");
+      targetTokenToPass = null;
+    }
+
+    function confirmPassToken() {
+      if (!targetTokenToPass) return;
+      const emailInput = document.getElementById("passFriendEmailInput");
+      const friendEmail = emailInput ? emailInput.value.trim().toLowerCase() : "";
+
+      if (!friendEmail || !friendEmail.endsWith("@gcu.edu.in")) {
+        showToast("Friend email must end with @gcu.edu.in", "error");
+        return;
+      }
+
+      const order = orders.find(o => o.id === targetTokenToPass);
+      if (order) {
+        order.student = `Transferred to (${friendEmail.split("@")[0]})`;
+        order.email = friendEmail;
+        saveOrders();
+        closePassTokenModal();
+        renderCurrentView();
+        playAudioChime();
+        showToast(`Token #${targetTokenToPass} transferred to ${friendEmail}!`, "success");
+      }
+    }
+
+    function cancelStudentOrder(tokenId) {
+      const order = orders.find(o => o.id === tokenId);
+      if (!order) return;
+      targetTokenToCancel = tokenId;
+      const modal = document.getElementById("cancelOrderModal");
+      if (!modal) return;
+      document.getElementById("cancelModalTokenId").textContent = `#${order.id}`;
+      document.getElementById("cancelModalRefundAmount").textContent = `₹${order.total.toFixed(2)}`;
+      modal.classList.remove("hidden");
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function closeCancelModal() {
+      const modal = document.getElementById("cancelOrderModal");
+      if (modal) modal.classList.add("hidden");
+      targetTokenToCancel = null;
+    }
+
+    function confirmCancelOrder() {
+      if (!targetTokenToCancel) return;
+      const idx = orders.findIndex(o => o.id === targetTokenToCancel);
+      if (idx !== -1) {
+        const order = orders[idx];
+        const refundAmt = order.total;
+
+        // Automatically refund order amount back to GCU Digital Wallet balance
+        walletBalance += refundAmt;
+        localStorage.setItem(K_WALLET, walletBalance.toString());
+
+        // Remove from active queue
+        orders.splice(idx, 1);
+        saveOrders();
+
+        closeCancelModal();
+        renderCurrentView();
+        playAudioChime();
+        showToast(`Token #${targetTokenToCancel} cancelled. ₹${refundAmt.toFixed(2)} refunded to your GCU Wallet!`, "success");
+      }
+    }
+
+    function openRushGuaranteeModal() {
+      const modal = document.getElementById("rushGuaranteeModal");
+      if (modal) {
+        modal.classList.remove("hidden");
+        if (window.lucide) lucide.createIcons();
+      }
+    }
+
+    function closeRushGuaranteeModal() {
+      const modal = document.getElementById("rushGuaranteeModal");
+      if (modal) modal.classList.add("hidden");
+    }
+
+    // Student Reviews & Ratings Handlers
+    function openReviewModal(shopId = null, orderId = null) {
+      const modal = document.getElementById("reviewOrderModal");
+      if (!modal) return;
+
+      if (shopId) {
+        const select = document.getElementById("reviewOutletSelect");
+        if (select) select.value = shopId;
+      }
+
+      setStarRating(5);
+      const commentInput = document.getElementById("reviewCommentInput");
+      if (commentInput) {
+        if (orderId) {
+          commentInput.placeholder = `Reviewing Order #${orderId} - comment on taste, queue speed, packaging...`;
+        } else {
+          commentInput.placeholder = "Tell other GCU students about food taste, queue speed, or print quality...";
+        }
+        commentInput.value = "";
+      }
+
+      modal.classList.remove("hidden");
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function closeReviewModal() {
+      const modal = document.getElementById("reviewOrderModal");
+      if (modal) modal.classList.add("hidden");
+    }
+
+    function setStarRating(num) {
+      currentSelectedRating = Math.max(1, Math.min(5, num));
+      const btns = document.querySelectorAll("#starRatingContainer .star-btn");
+      btns.forEach((btn, idx) => {
+        if (idx < currentSelectedRating) {
+          btn.classList.add("text-amber-400");
+          btn.classList.remove("text-slate-300", "dark:text-slate-600");
+        } else {
+          btn.classList.remove("text-amber-400");
+          btn.classList.add("text-slate-300", "dark:text-slate-600");
+        }
+      });
+
+      const label = document.getElementById("starRatingLabel");
+      const descriptions = [
+        "",
+        "1 / 5 Stars (Poor)",
+        "2 / 5 Stars (Fair)",
+        "3 / 5 Stars (Good)",
+        "4 / 5 Stars (Very Good)",
+        "5 / 5 Stars (Excellent)"
+      ];
+      if (label) label.textContent = descriptions[currentSelectedRating] || `${currentSelectedRating} / 5 Stars`;
+    }
+
+    function submitStudentReview() {
+      const select = document.getElementById("reviewOutletSelect");
+      const shopId = select ? select.value : "food-court";
+      const commentInput = document.getElementById("reviewCommentInput");
+      const comment = commentInput ? commentInput.value.trim() : "";
+
+      if (!comment) {
+        showToast("Please enter a short review comment before submitting", "error");
+        return;
+      }
+
+      const shop = SHOPS.find(s => s.id === shopId) || SHOPS[0];
+      const studentName = currentUser ? currentUser.name : "GCU Student";
+      const studentEmail = currentUser ? currentUser.email : "student@gcu.edu.in";
+
+      const newReview = {
+        id: Date.now(),
+        shopId: shopId,
+        shopName: shop.name,
+        student: studentName,
+        email: studentEmail,
+        rating: currentSelectedRating,
+        comment: comment,
+        date: "Today, " + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        reply: ""
+      };
+
+      reviews.unshift(newReview);
+      localStorage.setItem(K_REVIEWS, JSON.stringify(reviews));
+
+      closeReviewModal();
+      renderCurrentView();
+      playAudioChime();
+      showToast(`Review for ${shop.name} submitted! Star ratings updated dynamically.`, "success");
+    }
+
+    // 7. Wallet Top-Up Modal
+    function openWalletModal() { document.getElementById("walletTopUpModal").classList.remove("hidden"); }
+    function closeWalletModal() { document.getElementById("walletTopUpModal").classList.add("hidden"); }
+    function setTopUpAmount(amt) { document.getElementById("customWalletAmount").value = amt; }
+    function confirmWalletTopUp() {
+      const val = parseFloat(document.getElementById("customWalletAmount").value);
+      if (val > 0) {
+        walletBalance += val;
+        localStorage.setItem(K_WALLET, walletBalance.toString());
+        closeWalletModal();
+        renderCurrentView();
+        showToast(`₹${val} added to your GCU Wallet!`, "success");
+      }
+    }
+
+    // 8. Auth, Domain Verification & Modals
+    function openLoginModal() { document.getElementById("loginModal").classList.remove("hidden"); if (window.lucide) lucide.createIcons(); }
+    function closeLoginModal() { if (currentUser) document.getElementById("loginModal").classList.add("hidden"); }
+
+    function switchLoginTab(tab) {
+      const sTab = document.getElementById("tabStudent");
+      const vTab = document.getElementById("tabVendor");
+      const sForm = document.getElementById("studentForm");
+      const vForm = document.getElementById("vendorForm");
+
+      if (tab === "student") {
+        sTab.className = "w-1/2 py-2 rounded-lg font-bold text-xs bg-brand-darkForest text-white dark:bg-brand-mint dark:text-brand-darkForest shadow-sm transition";
+        vTab.className = "w-1/2 py-2 rounded-lg font-semibold text-xs text-brand-slate dark:text-slate-300 transition";
+        sForm.classList.remove("hidden");
+        vForm.classList.add("hidden");
+      } else {
+        vTab.className = "w-1/2 py-2 rounded-lg font-bold text-xs bg-brand-darkForest text-white dark:bg-brand-mint dark:text-brand-darkForest shadow-sm transition";
+        sTab.className = "w-1/2 py-2 rounded-lg font-semibold text-xs text-brand-slate dark:text-slate-300 transition";
+        vForm.classList.remove("hidden");
+        sForm.classList.add("hidden");
+      }
+    }
+
+    function quickDemoLogin(role) {
+      if (role === "student") {
+        currentUser = { name: "Rahul Sharma", email: "rahul.s@gcu.edu.in", role: "student" };
+        currentRole = "student";
+        currentTab = "dashboard";
+      } else {
+        currentUser = { name: "Manager - Stationery & Print", email: "stationery.manager@gcu.edu.in", role: "vendor", outlet: "stationery-print" };
+        currentRole = "vendor";
+        vendorOutletId = "stationery-print";
+        currentTab = "v-dashboard";
+      }
+
+      localStorage.setItem(K_USER, JSON.stringify(currentUser));
+      applyUserSession();
+      showToast(`Logged in as ${currentUser.name}`, "success");
+    }
+
+    function handleStudentCustomLogin() {
+      const email = document.getElementById("studentEmailInput").value.trim();
+      // Strictly enforced domain format: name@gcu.edu.in
+      if (!email || !email.endsWith("@gcu.edu.in")) {
+        showToast("College email must strictly match format: name@gcu.edu.in", "error");
+        return;
+      }
+
+      currentUser = { name: email.split("@")[0].replace(".", " "), email: email, role: "student" };
+      currentRole = "student";
+      currentTab = "dashboard";
+      localStorage.setItem(K_USER, JSON.stringify(currentUser));
+      applyUserSession();
+      showToast(`Welcome to NoMoreQ, ${currentUser.name}!`, "success");
+    }
+
+    function handleVendorCustomLogin() {
+      const outletId = document.getElementById("loginVendorOutletSelect").value;
+      const email = document.getElementById("vendorEmailInput").value.trim();
+      if (!email || !email.endsWith("@gcu.edu.in")) {
+        showToast("Vendor email must strictly match format: vendor.name@gcu.edu.in", "error");
+        return;
+      }
+
+      const shop = SHOPS.find(s => s.id === outletId);
+      currentUser = { name: `Manager - ${shop.name}`, email: email, role: "vendor", outlet: outletId };
+      currentRole = "vendor";
+      vendorOutletId = outletId;
+      currentTab = "v-dashboard";
+      localStorage.setItem(K_USER, JSON.stringify(currentUser));
+      applyUserSession();
+      showToast(`Vendor portal active for ${shop.name}`, "success");
+    }
+
+    function applyUserSession() {
+      if (!currentUser) return;
+      document.getElementById("topUserName").textContent = currentUser.name;
+      document.getElementById("topUserRole").textContent = currentRole === "student" ? "Student" : "Vendor";
+      document.getElementById("topUserAvatar").textContent = currentUser.name.charAt(0).toUpperCase();
+
+      document.getElementById("sidebarUserName").textContent = currentUser.name;
+      document.getElementById("sidebarUserRole").textContent = `${currentRole === 'student' ? 'Student' : 'Vendor'} • gcu.edu.in`;
+      document.getElementById("sidebarAvatar").textContent = currentUser.name.charAt(0).toUpperCase();
+
+      renderSidebarNav();
+      renderCurrentView();
+      closeLoginModal();
+    }
+
+    function openRoleSwitchModal() { openLoginModal(); }
+    function handleLogout() {
+      currentUser = null;
+      localStorage.removeItem(K_USER);
+      openLoginModal();
+      showToast("Logged out of session", "info");
+    }
+
+    // 9. Theme, Audio & Helpers
+    function toggleTheme() {
+      isDark = !isDark;
+      localStorage.setItem(K_THEME, isDark ? "dark" : "light");
+      applyTheme();
+      showToast(`Theme switched to ${isDark ? 'Dark' : 'Light'} Mode`, "info");
+    }
+
+    function applyTheme() {
+      const html = document.documentElement;
+      const icon = document.getElementById("themeIcon");
+      if (isDark) {
+        html.classList.add("dark");
+        if (icon) icon.setAttribute("data-lucide", "sun");
+      } else {
+        html.classList.remove("dark");
+        if (icon) icon.setAttribute("data-lucide", "moon");
+      }
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function toggleVoiceAssistant() {
+      voiceEnabled = !voiceEnabled;
+      localStorage.setItem(K_VOICE, voiceEnabled);
+      updateVoiceUI();
+      showToast(voiceEnabled ? "Voice Assistant Enabled" : "Voice Assistant Muted", "info");
+    }
+
+    function updateVoiceUI() {
+      const badge = document.getElementById("voiceBadge");
+      const icon = document.getElementById("voiceIcon");
+      if (badge) badge.textContent = voiceEnabled ? "Voice ON" : "Voice OFF";
+      if (icon) icon.classList.toggle("opacity-40", !voiceEnabled);
+    }
+
+    function toggleSoundAlerts() {
+      soundEnabled = !soundEnabled;
+      localStorage.setItem(K_SOUND, soundEnabled);
+      updateSoundUI();
+      if (soundEnabled) playAudioChime();
+      showToast(soundEnabled ? "Audio Chime Alerts Enabled" : "Audio Chimes Muted", "info");
+    }
+
+    function updateSoundUI() {
+      const icon = document.getElementById("soundIcon");
+      if (icon) icon.setAttribute("data-lucide", soundEnabled ? "bell" : "bell-off");
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function initLiveClock() {
+      const el = document.getElementById("navLiveClock");
+      const tick = () => {
+        if (el) el.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      };
+      tick();
+      setInterval(tick, 1000);
+    }
+
+    function initRushChart() {
+      const ctx = document.getElementById("rushHoursChart");
+      if (!ctx) return;
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: ['8:30 AM', '10:00 AM', '11:15 AM', '12:45 PM', '1:30 PM', '2:45 PM', '4:00 PM', '5:15 PM'],
+          datasets: [
+            {
+              label: 'Food Court & Stalls Traffic',
+              data: [20, 35, 55, 92, 85, 38, 70, 25],
+              borderColor: '#1C3123',
+              backgroundColor: 'rgba(200, 214, 175, 0.4)',
+              borderWidth: 2.5,
+              fill: true,
+              tension: 0.4
+            },
+            {
+              label: 'Stationery & Print Stall Traffic',
+              data: [80, 45, 30, 65, 88, 30, 60, 15],
+              borderColor: '#3B7A57',
+              borderDash: [4, 4],
+              borderWidth: 2,
+              fill: false,
+              tension: 0.4
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { position: 'top', labels: { boxWidth: 12, font: { size: 11, family: 'Plus Jakarta Sans' } } } },
+          scales: { y: { min: 0, max: 100, ticks: { callback: v => v + '%' } } }
+        }
+      });
+    }
+
+    function showToast(msg, type = "info") {
+      const box = document.getElementById("toastContainer");
+      if (!box) return;
+      const t = document.createElement("div");
+      t.className = `p-3 px-4 rounded-xl border shadow-lg text-xs font-semibold flex items-center gap-2 pointer-events-auto transition-all duration-300 transform translate-y-2 opacity-0 bg-brand-cream dark:bg-brand-darkSurface border-brand-border dark:border-brand-darkBorder text-brand-darkForest dark:text-white`;
+      t.innerHTML = `<i data-lucide="info" class="w-4 h-4 text-brand-accent shrink-0"></i><span>${msg}</span>`;
+      box.appendChild(t);
+      if (window.lucide) lucide.createIcons();
+      setTimeout(() => t.classList.remove("translate-y-2", "opacity-0"), 10);
+      setTimeout(() => {
+        t.classList.add("translate-y-2", "opacity-0");
+        setTimeout(() => t.remove(), 250);
+      }, 3200);
+    }
+  </script>
+</body>
+</html>
